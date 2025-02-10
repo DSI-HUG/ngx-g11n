@@ -1,0 +1,11 @@
+/.angular
+/.git
+/.nx
+/node_modules
+/dist
+
+package-lock.json
+
+**/*.md
+**/*.js
+**/*.ts

@@ -1,0 +1,24 @@
+{
+    "locale": "de-CH",
+    "translations": {
+        "dateSection": "Datum (Pipe)",
+        "currencySection": "Währung (Pipe)",
+        "decimalSection": "Dezimal (Pipe)",
+        "percentageSection": "Prozent (Pipe)",
+        "pluralSection": "Plural (Pipe)",
+        "pluralNoMessage": "Keine Nachricht",
+        "pluralOneMessage": "Eine Nachricht",
+        "pluralMultipleMessages": "Mehrere Nachrichten",
+        "dateFnsSection": "Date-fns",
+        "icuSelectSection": "Select (ICU)",
+        "icuSelectMessage": " {$ICU} ",
+        "5224588957123522720": "{VAR_SELECT, select, male {Mann} female {Frau} other {Alien}}",
+        "icuPluralizationSection": "Plural (ICU)",
+        "icuPluralizationMessage": " {$ICU} ",
+        "6942812824473713826": "{VAR_PLURAL, plural, =0 {Keine nachricht} =1 {Eine nachricht} other {Mehrere nachrichten}}",
+        "angularMaterialSection": "Angular Material",
+        "angularMaterialDate": "Datum",
+        "acceptLanguageSection": "Accept-Language",
+        "receivedFromBackend": "vom Backend empfangen"
+    }
+}

@@ -1,0 +1,23 @@
+{
+  "locale": "en-US",
+  "translations": {
+    "dateSection": "-",
+    "currencySection": "-",
+    "decimalSection": "-",
+    "percentageSection": "-",
+    "pluralSection": "-",
+    "icuSelectSection": "-",
+    "icuSelectMessage": " {$ICU} ",
+    "5224588957123522720": "{VAR_SELECT, select, male {-} female {-} other {-}}",
+    "icuPluralizationSection": "-",
+    "icuPluralizationMessage": " {$ICU} ",
+    "6942812824473713826": "{VAR_PLURAL, plural, =0 {-} =1 {-} other {-}}",
+    "dateFnsSection": "-",
+    "angularMaterialSection": "-",
+    "acceptLanguageSection": "-",
+    "receivedFromBackend": "-",
+    "pluralNoMessage": "-",
+    "pluralOneMessage": "-",
+    "pluralMultipleMessages": "-"
+  }
+}

@@ -1,0 +1,7 @@
+{
+    "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+    "dest": "../../dist/ngx-g11n",
+    "lib": {
+        "entryFile": "new/index.ts"
+    }
+}

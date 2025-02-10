@@ -1,0 +1,71 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "ng-add",
+    "title": "ng-add schematic",
+    "type": "object",
+    "properties": {
+        "project": {
+            "description": "Name of the Angular project",
+            "type": "string",
+            "$default": {
+                "$source": "projectName"
+            }
+        },
+        "defaultLanguage": {
+            "x-prompt": "Default language",
+            "description": "Default language",
+            "type": "string",
+            "default": "fr-CH"
+        },
+        "defaultCurrency": {
+            "x-prompt": "Default currency",
+            "description": "Default currency",
+            "type": "string",
+            "default": "CHF"
+        },
+        "useNavigatorLanguage": {
+            "x-prompt": "Use navigator language",
+            "description": "Use navigator language",
+            "type": "boolean",
+            "default": true
+        },
+        "loadLocaleExtra": {
+            "x-prompt": "Use Angular locale extra",
+            "description": "Use Angular locale extra",
+            "type": "boolean",
+            "default": false
+        },
+        "translationsPath": {
+            "x-prompt": "Translations path",
+            "description": "Translations path",
+            "type": "string",
+            "default": "/translations"
+        },
+        "queryParamName": {
+            "x-prompt": "Query param name",
+            "description": "Query param name",
+            "type": "string",
+            "default": "lang"
+        },
+        "interceptor": {
+            "x-prompt": "Auto-inject locale in request headers",
+            "description": "Auto-inject locale in request headers",
+            "type": "boolean",
+            "default": true
+        },
+        "material": {
+            "x-prompt": "Add support for Angular Material",
+            "description": "Support for Angular Material",
+            "type": "boolean",
+            "default": true
+        },
+        "defaultLocales": {
+            "x-prompt": "Add locales [fr-CH, de-CH] by default",
+            "description": "Add locales [fr-CH, de-CH] by default",
+            "type": "boolean",
+            "default": true
+        }
+    },
+    "required": [],
+    "additionalProperties": false
+}

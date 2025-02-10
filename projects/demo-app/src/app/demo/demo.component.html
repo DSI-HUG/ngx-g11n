@@ -1,0 +1,113 @@
+<header>
+    <button (click)="switchLanguage('fr-CH')">fr-CH</button>
+    <button (click)="switchLanguage('de-CH')">de-CH</button>
+    <span>
+        Current:
+        <strong>{{ currentLanguage }}</strong>
+    </span>
+</header>
+
+<section>
+    <strong i18n="@@dateSection">-</strong>
+    :
+    <span>{{ currentDate | date }}</span>
+    -
+    <span>{{ currentDate | date: 'fullDate' }}</span>
+    -
+    <span>{{ currentDate | date: 'yyyy-MM-dd HH:mm:ss' }}</span>
+</section>
+
+<section>
+    <strong i18n="@@currencySection">-</strong>
+    :
+    <span>{{ price | currency }}</span>
+    -
+    <span>{{ price | currency: 'USD' }}</span>
+    -
+    <span>{{ price | currency: 'EUR' : 'symbol-narrow' }}</span>
+</section>
+
+<section>
+    <strong i18n="@@decimalSection">-</strong>
+    :
+    <span>{{ num | number }}</span>
+    -
+    <span>{{ num | number: '1.2-2' }}</span>
+</section>
+
+<section>
+    <strong i18n="@@percentageSection">-</strong>
+    :
+    <span>{{ percentage | percent: '1.2-2' }}</span>
+</section>
+
+<section>
+    <strong i18n="@@pluralSection">-</strong>
+    :
+    <span>{{ 0 | i18nPlural: messageMapping }}</span>
+    -
+    <span>{{ 1 | i18nPlural: messageMapping }}</span>
+    -
+    <span>{{ 2 | i18nPlural: messageMapping }}</span>
+</section>
+
+<section>
+    <strong i18n="@@icuSelectSection">-</strong>
+    :
+    <span i18n="@@icuSelectMessage">
+        {'male', select, male {-} female {-} other {-}}
+    </span>
+    -
+    <span i18n="@@icuSelectMessage">
+        {'female', select, male {-} female {-} other {-}}
+    </span>
+    -
+    <span i18n="@@icuSelectMessage">
+        {'other', select, male {-} female {-} other {-}}
+    </span>
+</section>
+
+<section>
+    <strong i18n="@@icuPluralizationSection">-</strong>
+    :
+    <span i18n="@@icuPluralizationMessage">
+        {0, plural, =0 {-} =1 {-} other {-}}
+    </span>
+    -
+    <span i18n="@@icuPluralizationMessage">
+        {1, plural, =0 {-} =1 {-} other {-}}
+    </span>
+    -
+    <span i18n="@@icuPluralizationMessage">
+        {2, plural, =0 {-} =1 {-} other {-}}
+    </span>
+</section>
+
+<section>
+    <strong i18n="@@dateFnsSection">-</strong>
+    :
+    <span>{{ dateFnsFormatted }}</span>
+</section>
+
+<section>
+    <strong i18n="@@angularMaterialSection">-</strong>
+    :
+    <span>
+        <mat-form-field>
+            <mat-label i18n="@@angularMaterialDate">-</mat-label>
+            <input matInput [matDatepicker]="dp" />
+            <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
+            <mat-datepicker #dp></mat-datepicker>
+        </mat-form-field>
+    </span>
+</section>
+
+<section>
+    <strong i18n="@@acceptLanguageSection">-</strong>
+    :
+    <span>
+        <ng-container i18n="@@receivedFromBackend">-</ng-container>
+        :
+        <strong>{{ backendResponse }}</strong>
+    </span>
+</section>

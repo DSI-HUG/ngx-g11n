@@ -1,0 +1,1 @@
+export { withDefaultLocales } from './main';
