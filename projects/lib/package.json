@@ -38,7 +38,7 @@
         "test:ci": "node ./make.mjs test-ci",
         "build": "node ./make.mjs build",
         "build:global": "node ./make.mjs build-global",
-        "release": "npm publish ../../dist --access=public --workspaces=false"
+        "release": "npm publish ../../dist/ngx-g11n --access=public --workspaces=false"
     },
     "peerDependencies": {
         "@hug/ngx-schematics-utilities": "^10.2.0",
