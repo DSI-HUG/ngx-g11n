@@ -9,15 +9,16 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 class G11nInterceptor implements HttpInterceptor {
+    private localeId = inject(LOCALE_ID);
     public intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-        const headers = request.headers.set('Accept-Language', inject(LOCALE_ID));
+        const headers = request.headers.set('Accept-Language', this.localeId);
         return next.handle(request.clone({ headers }));
     }
 }
 
 export const withInterceptor = (): G11nFeature => ({
     providers: [
-        { provide: HTTP_INTERCEPTORS, useClass: G11nInterceptor, multi: true }
+        { provide: HTTP_INTERCEPTORS, useClass: G11nInterceptor, multi: true, deps: [LOCALE_ID] }
     ]
 });
 
