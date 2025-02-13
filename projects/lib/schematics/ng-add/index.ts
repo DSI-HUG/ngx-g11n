@@ -2,7 +2,8 @@
 import { chain, noop, Rule } from '@angular-devkit/schematics';
 import {
     addImportToFile, addImportToNgModule, addPackageJsonDependencies, addProviderToBootstrapApplication, application,
-    ChainableApplicationContext, deployFiles, getAngularVersion, logError, modifyJsonFile, schematic, workspace
+    ChainableApplicationContext, deployFiles, getAngularVersion, logError, modifyJsonFile, packageInstallTask,
+    schematic, workspace
 } from '@hug/ngx-schematics-utilities';
 
 import { NgAddOptions } from './ng-add-options';
@@ -120,7 +121,8 @@ export default (options: NgAddOptions): Rule =>
                 addPackageJsonDependencies([{
                     name: '@angular/material-date-fns-adapter',
                     version: `^${ngVersion.major}.0.0`
-                }])
+                }]),
+                packageInstallTask()
             ]) : noop())
             .toRule(),
 
