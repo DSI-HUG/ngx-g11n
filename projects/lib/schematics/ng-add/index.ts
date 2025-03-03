@@ -5,6 +5,7 @@ import {
     ChainableApplicationContext, deployFiles, getAngularVersion, logError, modifyJsonFile, packageInstallTask,
     schematic, workspace
 } from '@hug/ngx-schematics-utilities';
+import { join } from 'node:path';
 
 import { NgAddOptions } from './ng-add-options';
 
@@ -38,7 +39,7 @@ const customizeProject = ({ project }: ChainableApplicationContext, options: NgA
 
     // angular.json
     const extractOptionsPath = ['projects', project.name, 'architect', 'extract-i18n', 'options'];
-    rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'outputPath'], `${project.assetsPath ?? ''}${options.translationsPath}`));
+    rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'outputPath'], join(project.assetsPath!, options.translationsPath)));
     rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'outFile'], `${options.defaultLanguage}.json`));
     rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'format'], 'json'));
     rules.push(modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage));
@@ -131,7 +132,7 @@ export default (options: NgAddOptions): Rule =>
                 if (!project.assetsPath) {
                     return logError('Deploying assets failed: no assets path found');
                 }
-                return deployFiles(options, './files', project.assetsPath);
+                return deployFiles(options, './files', join(project.assetsPath, options.translationsPath));
             })
             .rule(context => customizeProject(context, options))
             .toRule()
