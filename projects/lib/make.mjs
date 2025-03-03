@@ -54,26 +54,30 @@ const spawnCmd = (cmd, args, verbose = true, exitOnError = true) => {
     const ret = spawnSync(cmd, args, {
         stdio: verbose ? 'inherit' : 'pipe'
     });
-    if (exitOnError && (ret.status !== 0)) {
+    if (exitOnError && ret.status !== 0) {
         process.exit(1);
     }
 };
 
-const cleanDir = (path, removeFolder = false) => new Promise(resolve => {
-    const exists = existsSync(path);
-    if (exists) {
-        rmSync(path, { recursive: true });
-    }
-    if (!removeFolder) {
-        // Give time to rmSync to unlock the file on Windows
-        setTimeout(() => {
-            mkdirSync(path, { recursive: true });
+const cleanDir = (path, removeFolder = false) =>
+    new Promise(resolve => {
+        const exists = existsSync(path);
+        if (exists) {
+            rmSync(path, { recursive: true });
+        }
+        if (!removeFolder) {
+            // Give time to rmSync to unlock the file on Windows
+            setTimeout(
+                () => {
+                    mkdirSync(path, { recursive: true });
+                    resolve();
+                },
+                exists ? 1000 : 0
+            );
+        } else {
             resolve();
-        }, exists ? 1000 : 0);
-    } else {
-        resolve();
-    }
-});
+        }
+    });
 
 const cleanUp = async () => {
     if (chokidarWatcher) {
@@ -98,13 +102,22 @@ const registerExitEvents = () => {
 
 const packDistAndInstallGlobally = async () => {
     log('> Packing..');
-    spawnCmd('npm', ['pack', DIST_PATH, '--pack-destination', DIST_PATH]);
+    spawnCmd('npm', [
+        'pack',
+        DIST_PATH,
+        '--pack-destination',
+        DIST_PATH
+    ]);
 
     log('> Installing globally..');
     const distPkgJson = JSON.parse(readFileSync(`${DIST_PATH}/package.json`));
     const libName = distPkgJson.name.replace('@', '').replace('/', '-');
     const filePath = `${DIST_PATH}/${libName}-${distPkgJson.version}.tgz`;
-    spawnCmd('npm', ['install', '--global', filePath]);
+    spawnCmd('npm', [
+        'install',
+        '--global',
+        filePath
+    ]);
     rmSync(filePath);
 };
 
@@ -112,7 +125,15 @@ const buildSchematics = async (exitOnError = true) => {
     if (existsSync(SCHEMATICS_SRC_PATH)) {
         if (existsSync('tsconfig.schematics.json')) {
             log('> Building schematics..');
-            spawnCmd('tsc', ['-p', './tsconfig.schematics.json'], true, exitOnError);
+            spawnCmd(
+                'tsc',
+                [
+                    '-p',
+                    './tsconfig.schematics.json'
+                ],
+                true,
+                exitOnError
+            );
         }
         log('> Copying schematics assets..');
         await copySchematicsAssets();
@@ -123,9 +144,27 @@ const buildLib = async (exitOnError = true) => {
     if (existsSync(LIBRARY_SRC_PATH)) {
         log('> Building library..');
         if (LIBRARY_TYPE === 'ng') {
-            spawnCmd('ng', ['build', NG_PROJECT_LIBRARY_NAME, '--configuration', 'production'], true, exitOnError);
+            spawnCmd(
+                'ng',
+                [
+                    'build',
+                    NG_PROJECT_LIBRARY_NAME,
+                    '--configuration',
+                    'production'
+                ],
+                true,
+                exitOnError
+            );
         } else {
-            spawnCmd('tsc', ['-p', './tsconfig.lib.prod.json'], true, exitOnError);
+            spawnCmd(
+                'tsc',
+                [
+                    '-p',
+                    './tsconfig.lib.prod.json'
+                ],
+                true,
+                exitOnError
+            );
         }
     }
 
@@ -135,7 +174,11 @@ const buildLib = async (exitOnError = true) => {
 
 const test = (tsconfigPath, ci = false) => {
     if (existsSync(tsconfigPath)) {
-        const args = [`--project=${tsconfigPath}`, '../../node_modules/jasmine/bin/jasmine.js', '--config=jasmine.json'];
+        const args = [
+            `--project=${tsconfigPath}`,
+            '../../node_modules/jasmine/bin/jasmine.js',
+            '--config=jasmine.json'
+        ];
         if (!ci) {
             args.unshift('--respawn', '--transpile-only');
         }
@@ -152,7 +195,10 @@ const testSchematics = (ci = false) => {
 const testLib = (ci = false) => {
     if (existsSync(LIBRARY_SRC_PATH)) {
         if (LIBRARY_TYPE === 'ng') {
-            const ligArgs = ['test', 'lib'];
+            const ligArgs = [
+                'test',
+                'lib'
+            ];
             if (ci) {
                 ligArgs.push('--configuration', 'ci');
             }
@@ -164,7 +210,10 @@ const testLib = (ci = false) => {
 };
 
 const lint = () => {
-    const lintArgs = ['--ignore-pattern', '**/files/**/*'];
+    const lintArgs = [
+        '--ignore-pattern',
+        '**/files/**/*'
+    ];
     if (existsSync(SCHEMATICS_SRC_PATH)) {
         lintArgs.unshift(`./{${LIBRARY_SRC},${SCHEMATICS_SRC}}/**/*.{ts,html}`);
     } else {
@@ -182,7 +231,13 @@ const watch = async () => {
         log(`> ${green('Done!')}`);
     };
 
-    chokidarWatcher = chokidarWatch([LIBRARY_SRC_PATH, SCHEMATICS_SRC_PATH], { ignoreInitial: true, usePolling: true });
+    chokidarWatcher = chokidarWatch(
+        [
+            LIBRARY_SRC_PATH,
+            SCHEMATICS_SRC_PATH
+        ],
+        { ignoreInitial: true, usePolling: true }
+    );
     chokidarWatcher.on('ready', rebuild);
     chokidarWatcher.on('add', rebuild);
     chokidarWatcher.on('change', rebuild);
@@ -224,7 +279,8 @@ const watch = async () => {
                 await packDistAndInstallGlobally();
                 log(`> ${green('Done!')}\n`);
                 break;
-            default: break;
+            default:
+                break;
         }
     } catch (err) {
         console.error(err);

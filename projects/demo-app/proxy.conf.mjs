@@ -7,9 +7,11 @@ export default {
         target: 'http://localhost:4200',
         /** @type { (req: IncomingMessage, res: ServerResponse) => boolean }  */
         bypass: (req, res) => {
-            res.end(JSON.stringify({
-                g11n: req.headers['accept-language']
-            }));
+            res.end(
+                JSON.stringify({
+                    g11n: req.headers['accept-language']
+                })
+            );
             return true;
         }
     }

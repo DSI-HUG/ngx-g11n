@@ -1,18 +1,18 @@
 /* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../out-tsc/spec",
-    "types": [
-      "jasmine",
-      "@angular/localize"
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../../out-tsc/spec",
+        "types": [
+            "jasmine",
+            "@angular/localize"
+        ]
+    },
+    "include": [
+        "**/*.spec.ts",
+        "**/*.d.ts"
+    ],
+    "exclude": [
+        "schematics/**"
     ]
-  },
-  "include": [
-    "**/*.spec.ts",
-    "**/*.d.ts"
-  ],
-  "exclude": [
-    "schematics/**"
-  ]
 }
