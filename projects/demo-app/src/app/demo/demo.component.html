@@ -1,6 +1,7 @@
 <header>
     <button (click)="switchLanguage('fr-CH')">fr-CH</button>
     <button (click)="switchLanguage('de-CH')">de-CH</button>
+    <button (click)="switchLanguage('en-US')">en-US</button>
     <span>
         Current:
         <strong>{{ currentLanguage }}</strong>
@@ -13,6 +14,8 @@
     <span>{{ currentDate | date }}</span>
     -
     <span>{{ currentDate | date: 'fullDate' }}</span>
+    -
+    <span>{{ currentDate | date: 'shortTime' }}</span>
     -
     <span>{{ currentDate | date: 'yyyy-MM-dd HH:mm:ss' }}</span>
 </section>
@@ -95,7 +98,7 @@
     <span>
         <mat-form-field>
             <mat-label i18n="@@angularMaterialDate">-</mat-label>
-            <input matInput [matDatepicker]="dp" />
+            <input matInput [matDatepicker]="dp" [value]="currentDate" />
             <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
             <mat-datepicker #dp></mat-datepicker>
         </mat-form-field>

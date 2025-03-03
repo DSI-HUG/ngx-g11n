@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { HttpClientModule } from '@angular/common/http';
 import { Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { G11nDebug, G11nModule, withInterceptor, withOptions } from '@hug/ngx-g11n';
-import { withDefaultLocales } from '@hug/ngx-g11n/locales';
+import { G11nDebug, G11nModule, withInterceptor, withLocales, withOptions } from '@hug/ngx-g11n';
 import { withDateFnsMaterial } from '@hug/ngx-g11n/material';
 
 import { routes } from './app.routes';
@@ -31,10 +31,28 @@ export class AppRoutingModule { }
         BrowserModule,
         HttpClientModule,
         G11nModule.forRoot(
-            withOptions({ debug: G11nDebug.NO_DEBUG }),
+            withLocales({
+                'fr-CH': {
+                    base: () => import('@angular/common/locales/fr-CH'),
+                    extra: () => import('@angular/common/locales/extra/fr-CH'),
+                    datefns: () => import('date-fns/locale/fr-CH')
+                },
+                'de-CH': {
+                    base: () => import('@angular/common/locales/de-CH'),
+                    extra: () => import('@angular/common/locales/extra/de-CH'),
+                    datefns: () => import('date-fns/locale/de')
+                },
+                'en-US': {
+                    base: () => import('@angular/common/locales/en'),
+                    extra: () => import('@angular/common/locales/extra/en'),
+                    datefns: () => import('date-fns/locale/en-US')
+                }
+            }),
+            withDateFnsMaterial(),
             withInterceptor(),
-            withDefaultLocales(),
-            withDateFnsMaterial()
+            withOptions({
+                debug: G11nDebug.NO_DEBUG
+            })
         )
     ],
     bootstrap: [AppComponent]

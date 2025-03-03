@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { provideHttpClient } from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { G11nDebug, provideG11n, withInterceptor, withOptions } from '@hug/ngx-g11n';
-import { withDefaultLocales } from '@hug/ngx-g11n/locales';
+import { G11nDebug, provideG11n, withInterceptor, withLocales, withOptions } from '@hug/ngx-g11n';
 import { withDateFnsMaterial } from '@hug/ngx-g11n/material';
 
 import { routes } from './app.routes';
@@ -15,7 +15,23 @@ export const appConfig: ApplicationConfig = {
         provideAnimations(),
         provideRouter(routes),
         provideG11n(
-            withDefaultLocales(),
+            withLocales({
+                'fr-CH': {
+                    base: () => import('@angular/common/locales/fr-CH'),
+                    extra: () => import('@angular/common/locales/extra/fr-CH'),
+                    datefns: () => import('date-fns/locale/fr-CH')
+                },
+                'de-CH': {
+                    base: () => import('@angular/common/locales/de-CH'),
+                    extra: () => import('@angular/common/locales/extra/de-CH'),
+                    datefns: () => import('date-fns/locale/de')
+                },
+                'en-US': {
+                    base: () => import('@angular/common/locales/en'),
+                    extra: () => import('@angular/common/locales/extra/en'),
+                    datefns: () => import('date-fns/locale/en-US')
+                }
+            }),
             withDateFnsMaterial(),
             withInterceptor(),
             withOptions({
