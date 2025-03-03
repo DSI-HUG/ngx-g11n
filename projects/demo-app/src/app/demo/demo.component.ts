@@ -9,7 +9,6 @@ import { currentLanguage, setLanguage } from '@hug/ngx-g11n';
 import { format } from 'date-fns';
 
 @Component({
-    standalone: true,
     selector: 'app-demo',
     templateUrl: './demo.component.html',
     styleUrl: './demo.component.scss',
