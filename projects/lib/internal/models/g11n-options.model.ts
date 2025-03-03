@@ -5,6 +5,7 @@ export interface G11nOptions {
     defaultCurrency?: string;
     useNavigatorLanguage?: boolean;
     loadLocaleExtra?: boolean;
+    useTranslations?: boolean;
     translationsPath?: string;
     queryParamName?: string;
     storage?: Storage;

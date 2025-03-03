@@ -18,6 +18,7 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     defaultCurrency: 'CHF',
     useNavigatorLanguage: true,
     loadLocaleExtra: false,
+    useTranslations: true,
     translationsPath: '/translations',
     queryParamName: QUERY_PARAM_NAME,
     storage: localStorage,
@@ -37,21 +38,19 @@ export const setLanguage = (value: string): void => {
 
 const loadTranslationFile = async (filePath: string, debug: G11nDebug = G11nDebug.NO_DEBUG): Promise<void> => {
     const debugMode = (FORCE_DEBUG !== G11nDebug.NO_DEBUG) ? FORCE_DEBUG : debug;
-    if (debugMode !== G11nDebug.NO_TRANSLATIONS) {
-        const response = await fetch(filePath);
-        const { translations } = await response.json() as G11nFile;
-        if (translations) {
-            if (debugMode === G11nDebug.SHOW_KEYS) {
-                Object.entries(translations).forEach(([key, value]) => {
-                    translations[key] = `${value} (@${key})`;
-                });
-            } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
-                Object.keys(translations).forEach(key => translations[key] = '-');
-            }
-            loadTranslations(translations);
-        } else {
-            throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
+    const response = await fetch(filePath);
+    const { translations } = await response.json() as G11nFile;
+    if (translations) {
+        if (debugMode === G11nDebug.SHOW_KEYS) {
+            Object.entries(translations).forEach(([key, value]) => {
+                translations[key] = `${value} (@${key})`;
+            });
+        } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
+            Object.keys(translations).forEach(key => translations[key] = '-');
         }
+        loadTranslations(translations);
+    } else {
+        throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
     }
 };
 
@@ -74,7 +73,9 @@ const loadLanguage = async (localeId: string, locales: Record<string, G11nLocale
     registerLocaleData(localeBase, localeId, localeExtra);
 
     // Load translations
-    await loadTranslationFile(`${options.translationsPath}/${localeId}.json`, options.debug);
+    if (options.useTranslations) {
+        await loadTranslationFile(`${options.translationsPath}/${localeId}.json`, options.debug);
+    }
 };
 
 const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOptions): string => {
@@ -90,7 +91,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
         } else if (localeIsSupported(localeIdFromUrl)) {
             return localeIdFromUrl;
         } else {
-            console.warn(`[@hug/ngx-g11n] Locale ${localeIdFromUrl} from url is not supported (will use storage if found)`);
+            console.warn(`[@hug/ngx-g11n] Locale ${localeIdFromUrl} from url was not found in given locales (will use storage if found)`);
         }
     }
 
@@ -100,7 +101,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
         if (localeIsSupported(localeIdFromStorage)) {
             return localeIdFromStorage;
         } else {
-            console.warn(`[@hug/ngx-g11n] Locale ${localeIdFromStorage} from storage is not supported (will use navigator if enabled)`);
+            console.warn(`[@hug/ngx-g11n] Locale ${localeIdFromStorage} from storage was not found in given locales (will use navigator if enabled)`);
         }
     }
 
@@ -109,7 +110,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
         if (localeIsSupported(navigator.language)) {
             return navigator.language;
         } else {
-            console.warn(`[@hug/ngx-g11n] Locale ${navigator.language} from browser is not supported (will use default setting)`);
+            console.warn(`[@hug/ngx-g11n] Locale ${navigator.language} from browser was not found in given locales (will use default setting)`);
         }
     }
 
@@ -118,7 +119,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
         return options.defaultLanguage;
     }
 
-    throw new Error(`[@hug/ngx-g11n] Locale ${options.defaultLanguage} is not supported`);
+    throw new Error(`[@hug/ngx-g11n] Locale ${options.defaultLanguage} was not found in given locales`);
 };
 
 /**

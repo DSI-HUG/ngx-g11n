@@ -261,6 +261,8 @@ interface G11nOptions {
     useNavigatorLanguage?: boolean;
     /** @default false */
     loadLocaleExtra?: boolean;
+    /** @default true */
+    useTranslations?: boolean;
     /** @default '/translations' */
     translationsPath?: string;
     /** @default 'lang' */
@@ -294,12 +296,6 @@ Will replace every translation with a dash (`-`).
 Useful when you need to see what messages are left untranslated.
 
 > Use `withOptions({ debug: G11nDebug.DUMMY_TRANSLATIONS }))` or the query parameter *(ex: `?lang=dummy`)*.
-
-#### # NO_TRANSLATIONS
-
-Will not load any external translation file, meaning the application will load with the hardcoded translations.
-
-> Use `withOptions({ debug: G11nDebug.NO_TRANSLATIONS }))`.
 
 #### # NO_DEBUG
 
