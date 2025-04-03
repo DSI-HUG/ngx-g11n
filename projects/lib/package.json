@@ -41,7 +41,6 @@
         "release": "npm publish ../../dist/ngx-g11n --access=public --workspaces=false"
     },
     "peerDependencies": {
-        "@hug/ngx-schematics-utilities": "^10.2.0",
         "@angular/common": ">= 14",
         "@angular/core": ">= 14",
         "@angular/localize": ">= 14",
@@ -65,6 +64,7 @@
         }
     },
     "dependencies": {
+        "@hug/ngx-schematics-utilities": "^10.2.2",
         "tslib": "^2.8.1"
     },
     "schematics": "./schematics/collection.json",
