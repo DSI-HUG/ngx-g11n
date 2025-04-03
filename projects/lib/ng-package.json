@@ -3,5 +3,8 @@
     "dest": "../../dist/ngx-g11n",
     "lib": {
         "entryFile": "new/index.ts"
-    }
+    },
+    "allowedNonPeerDependencies": [
+        "@hug/ngx-schematics-utilities"
+    ]
 }
