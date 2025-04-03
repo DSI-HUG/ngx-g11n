@@ -335,7 +335,7 @@ Copyright (C) 2025 [HUG - Hôpitaux Universitaires Genève][dsi-hug]
 [angular-localize-url]: https://angular.dev/guide/i18n#learn-about-angular-internationalization
 [angular-material-url]: https://material.angular.io
 [datefns-url]: https://material.angular.io/components/datepicker/overview#choosing-a-date-implementation-and-date-format-settings
-[developer]: https://github.com/dsi-hug/ngx-sentry/blob/main/DEVELOPER.md
-[contributing]: https://github.com/dsi-hug/ngx-sentry/blob/main/CONTRIBUTING.md
-[codeofconduct]: https://github.com/dsi-hug/ngx-sentry/blob/main/CODE_OF_CONDUCT.md
+[developer]: https://github.com/dsi-hug/ngx-g11n/blob/main/DEVELOPER.md
+[contributing]: https://github.com/dsi-hug/ngx-g11n/blob/main/CONTRIBUTING.md
+[codeofconduct]: https://github.com/dsi-hug/ngx-g11n/blob/main/CODE_OF_CONDUCT.md
 [dsi-hug]: https://github.com/dsi-hug
