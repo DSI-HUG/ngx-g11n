@@ -81,8 +81,14 @@ const loadLanguage = async (localeId: string, locales: Record<string, G11nLocale
 const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOptions): string => {
     const localeIsSupported = (id: string): boolean => id in locales;
 
+    /**
+     * Initialize query param name
+     * We do it here as getLocaleToUse is called first in the injection tree (cf. provide: LOCALE_ID)
+     */
+    initQueryParamName(options);
+
     // Priority 1 : query param
-    const localeIdFromUrl = new URL(location.href).searchParams.get(options.queryParamName!);
+    const localeIdFromUrl = new URL(location.href).searchParams.get(QUERY_PARAM_NAME);
     if (localeIdFromUrl) {
         if (localeIdFromUrl === 'keys') {
             FORCE_DEBUG = G11nDebug.SHOW_KEYS;
@@ -123,6 +129,22 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
 };
 
 /**
+ * We have to determine the query param name and export it globally as it will be used by the refreshUrl function, which
+ * do not have access to the option object. We also have to support case-insensitive cases (ex: lang, Lang, LANG, etc.).
+ * @internal
+ */
+const initQueryParamName = (options: G11nOptions): void => {
+    let value = options.queryParamName ?? DEFAULT_OPTIONS.queryParamName!;
+    // eslint-disable-next-line no-loops/no-loops
+    for (const key of new URL(location.href).searchParams.keys()) {
+        if (key.toLowerCase() === value.toLowerCase()) {
+            value = key;
+        }
+    }
+    QUERY_PARAM_NAME = value;
+};
+
+/**
  * @internal
  */
 export const init = (): Provider[] => [
@@ -144,7 +166,6 @@ export const init = (): Provider[] => [
         provide: APP_INITIALIZER,
         useFactory: (localeId: string, locales: Record<string, G11nLocale>, options: G11nOptions) =>
             async (): Promise<void> => {
-                QUERY_PARAM_NAME = options.queryParamName ?? DEFAULT_OPTIONS.queryParamName!;
                 await loadLanguage(localeId, locales, options);
             },
         deps: [LOCALE_ID, LOCALES, G11N_OPTIONS],
