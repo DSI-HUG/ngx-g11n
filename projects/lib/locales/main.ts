@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { G11nFeature, LOCALES } from '@hug/ngx-g11n/internal';
+import { G11nFeature, G11nLocale, LOCALES } from '@hug/ngx-g11n/internal';
 
-export const withDefaultLocales = (): G11nFeature => ({
+export const withDefaultLocales = (locales: Record<string, G11nLocale> = {}): G11nFeature => ({
     providers: [{
         provide: LOCALES,
         useValue: {
@@ -14,7 +14,8 @@ export const withDefaultLocales = (): G11nFeature => ({
                 base: () => import('@angular/common/locales/de-CH'),
                 extra: () => import('@angular/common/locales/extra/de-CH'),
                 datefns: () => import('date-fns/locale/de')
-            }
+            },
+            ...locales
         }
     }]
 });
