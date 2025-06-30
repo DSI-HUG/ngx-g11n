@@ -28,7 +28,7 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     queryParamName: 'lang'
 };
 
-const customizeProject = ({ project }: ChainableApplicationContext, options: NgAddOptions, ngVersion: Version): Rule => {
+const customizeProject = ({ project, tree }: ChainableApplicationContext, options: NgAddOptions, ngVersion: Version): Rule => {
     const rules: Rule[] = [];
 
     // tsconfig.json
@@ -46,8 +46,16 @@ const customizeProject = ({ project }: ChainableApplicationContext, options: NgA
     rules.push(modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage));
 
     // Provide library
-    const configFile = (project.isStandalone) ? project.mainConfigFilePath : project.pathFromSourceRoot('app/app.module.ts');
-    if (configFile) {
+    let configFile;
+    if (project.isStandalone) {
+        configFile = project.mainConfigFilePath;
+    } else if (tree.exists(project.pathFromSourceRoot('app/app-module.ts'))) {
+        configFile = project.pathFromSourceRoot('app/app-module.ts');
+    } else {
+        configFile = project.pathFromSourceRoot('app/app.module.ts');
+    }
+
+    if (configFile && tree.exists(configFile)) {
         const libName = (Number(ngVersion.major) >= 15) ? '@hug/ngx-g11n' : '@hug/ngx-g11n/legacy';
         let provider = (project.isStandalone) ? 'provideG11n(' : 'G11nModule.forRoot(';
 

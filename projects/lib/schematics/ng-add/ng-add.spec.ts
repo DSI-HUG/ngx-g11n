@@ -39,9 +39,9 @@ import { NgAddOptions } from './ng-add-options';
                     expect(content).toMatch(/provideG11n\(\n.*withDefaultLocales\(\),\n.*withDateFnsMaterial\(\),\n.*withInterceptor\(\)\n.*\)/gm);
                 });
             } else {
-                it('should update app.module.ts', async () => {
+                it('should update app-module.ts', async () => {
                     await runner.runSchematic('ng-add', defaultOptions, tree);
-                    const content = tree.readContent(project.pathFromSourceRoot('app/app.module.ts'));
+                    const content = tree.readContent(project.pathFromSourceRoot('app/app-module.ts'));
                     expect(content).toContain('import { withInterceptor, G11nModule } from \'@hug/ngx-g11n\';');
                     expect(content).toContain('import { withDefaultLocales } from \'@hug/ngx-g11n/locales\';');
                     expect(content).toContain('import { withDateFnsMaterial } from \'@hug/ngx-g11n/material\';');
