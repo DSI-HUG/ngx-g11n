@@ -50,9 +50,9 @@ const customizeProject = ({ project, tree }: ChainableApplicationContext, option
     if (project.isStandalone) {
         configFile = project.mainConfigFilePath;
     } else if (tree.exists(project.pathFromSourceRoot('app/app-module.ts'))) {
-        configFile = project.pathFromSourceRoot('app/app-module.ts');
+        configFile = project.pathFromSourceRoot('app/app-module.ts'); // for Angular 20+
     } else {
-        configFile = project.pathFromSourceRoot('app/app.module.ts');
+        configFile = project.pathFromSourceRoot('app/app.module.ts'); // for Angular < 20
     }
 
     if (configFile && tree.exists(configFile)) {

@@ -77,7 +77,7 @@ ng add @hug/ngx-g11n
 >             }
 >           },
 >           "extract-i18n": {
->             "builder": "@angular-devkit/build-angular:extract-i18n",
+>             "builder": "@angular/build:extract-i18n",
 >             "options": {
 >               "outputPath": "projects/demo-app/public/i18n",
 >               "outFile": "fr-CH.json",
@@ -172,7 +172,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-* `app.module.ts` *(if the app is **not** a standalone Angular application)*
+* `app-module.ts` *(if the app is **not** a standalone Angular application)*
 
 ```ts
 // import { G11nModule } from '@hug/ngx-g11n/legacy'; /* for ng14 apps */
