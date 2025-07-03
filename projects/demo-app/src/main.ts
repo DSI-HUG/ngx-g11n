@@ -1,7 +1,6 @@
 /// <reference types="@angular/localize" />
 
-import { bootstrapApplication } from '@angular/platform-browser';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { bootstrapApplication, platformBrowser } from '@angular/platform-browser';
 
 import { AppComponent } from './app/app.component';
 import { AppModule } from './app/app.module';
@@ -14,7 +13,7 @@ void (async (): Promise<void> => {
         bootstrapApplication(AppComponent, appConfig)
             .catch((err: unknown) => console.error(err));
     } else {
-        platformBrowserDynamic()
+        platformBrowser()
             .bootstrapModule(AppModule)
             .catch((err: unknown) => console.error(err));
     }
