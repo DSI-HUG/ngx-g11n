@@ -102,22 +102,13 @@ const registerExitEvents = () => {
 
 const packDistAndInstallGlobally = async () => {
     log('> Packing..');
-    spawnCmd('npm', [
-        'pack',
-        DIST_PATH,
-        '--pack-destination',
-        DIST_PATH
-    ]);
+    spawnCmd('npm', ['pack', DIST_PATH, '--pack-destination', DIST_PATH]);
 
     log('> Installing globally..');
     const distPkgJson = JSON.parse(readFileSync(`${DIST_PATH}/package.json`));
     const libName = distPkgJson.name.replace('@', '').replace('/', '-');
     const filePath = `${DIST_PATH}/${libName}-${distPkgJson.version}.tgz`;
-    spawnCmd('npm', [
-        'install',
-        '--global',
-        filePath
-    ]);
+    spawnCmd('npm', ['install', '--global', filePath]);
     rmSync(filePath);
 };
 
@@ -125,15 +116,7 @@ const buildSchematics = async (exitOnError = true) => {
     if (existsSync(SCHEMATICS_SRC_PATH)) {
         if (existsSync('tsconfig.schematics.json')) {
             log('> Building schematics..');
-            spawnCmd(
-                'tsc',
-                [
-                    '-p',
-                    './tsconfig.schematics.json'
-                ],
-                true,
-                exitOnError
-            );
+            spawnCmd('tsc', ['-p', './tsconfig.schematics.json'], true, exitOnError);
         }
         log('> Copying schematics assets..');
         await copySchematicsAssets();
@@ -144,27 +127,9 @@ const buildLib = async (exitOnError = true) => {
     if (existsSync(LIBRARY_SRC_PATH)) {
         log('> Building library..');
         if (LIBRARY_TYPE === 'ng') {
-            spawnCmd(
-                'ng',
-                [
-                    'build',
-                    NG_PROJECT_LIBRARY_NAME,
-                    '--configuration',
-                    'production'
-                ],
-                true,
-                exitOnError
-            );
+            spawnCmd('ng', ['build', NG_PROJECT_LIBRARY_NAME, '--configuration', 'production'], true, exitOnError);
         } else {
-            spawnCmd(
-                'tsc',
-                [
-                    '-p',
-                    './tsconfig.lib.prod.json'
-                ],
-                true,
-                exitOnError
-            );
+            spawnCmd('tsc', ['-p', './tsconfig.prod.json'], true, exitOnError);
         }
     }
 
@@ -195,25 +160,19 @@ const testSchematics = (ci = false) => {
 const testLib = (ci = false) => {
     if (existsSync(LIBRARY_SRC_PATH)) {
         if (LIBRARY_TYPE === 'ng') {
-            const ligArgs = [
-                'test',
-                'lib'
-            ];
+            const ligArgs = ['test', 'lib'];
             if (ci) {
                 ligArgs.push('--configuration', 'ci');
             }
             spawnCmd('ng', ligArgs, true, false);
         } else {
-            test('tsconfig.lib.spec.json', ci);
+            test('tsconfig.spec.json', ci);
         }
     }
 };
 
 const lint = () => {
-    const lintArgs = [
-        '--ignore-pattern',
-        '**/files/**/*'
-    ];
+    const lintArgs = ['--ignore-pattern', '**/files/**/*', '--ignore-pattern', '**/*.spec.ts'];
     if (existsSync(SCHEMATICS_SRC_PATH)) {
         lintArgs.unshift(`./{${LIBRARY_SRC},${SCHEMATICS_SRC}}/**/*.{ts,html}`);
     } else {
@@ -231,13 +190,7 @@ const watch = async () => {
         log(`> ${green('Done!')}`);
     };
 
-    chokidarWatcher = chokidarWatch(
-        [
-            LIBRARY_SRC_PATH,
-            SCHEMATICS_SRC_PATH
-        ],
-        { ignoreInitial: true, usePolling: true }
-    );
+    chokidarWatcher = chokidarWatch([LIBRARY_SRC_PATH, SCHEMATICS_SRC_PATH], { ignoreInitial: true, usePolling: true });
     chokidarWatcher.on('ready', rebuild);
     chokidarWatcher.on('add', rebuild);
     chokidarWatcher.on('change', rebuild);
