@@ -24,19 +24,14 @@
                         },
                         "index": "projects/demo-app/src/index.html",
                         "browser": "projects/demo-app/src/main.ts",
-                        "polyfills": [
-                            "zone.js",
-                            "@angular/localize/init"
-                        ],
+                        "polyfills": ["zone.js", "@angular/localize/init"],
                         "tsConfig": "projects/demo-app/tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
                         "assets": [
                             {
                                 "glob": "**/*",
                                 "input": "projects/demo-app/public",
-                                "ignore": [
-                                    "translations/_extract.json"
-                                ]
+                                "ignore": ["translations/_extract.json"]
                             }
                         ],
                         "styles": [
@@ -91,14 +86,16 @@
                         "format": "json"
                     }
                 },
+                "lint": {
+                    "builder": "@angular-eslint/builder:lint",
+                    "options": {
+                        "lintFilePatterns": ["**/*.ts", "**/*.html"]
+                    }
+                },
                 "test": {
                     "builder": "@angular/build:karma",
                     "options": {
-                        "polyfills": [
-                            "zone.js",
-                            "zone.js/testing",
-                            "@angular/localize/init"
-                        ],
+                        "polyfills": ["zone.js", "zone.js/testing", "@angular/localize/init"],
                         "tsConfig": "projects/demo-app/tsconfig.spec.json",
                         "inlineStyleLanguage": "scss",
                         "assets": [
@@ -148,11 +145,7 @@
                     },
                     "options": {
                         "tsConfig": "projects/lib/tsconfig.spec.json",
-                        "polyfills": [
-                            "zone.js",
-                            "zone.js/testing",
-                            "@angular/localize/init"
-                        ]
+                        "polyfills": ["zone.js", "zone.js/testing", "@angular/localize/init"]
                     }
                 }
             }

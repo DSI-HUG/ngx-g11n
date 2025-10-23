@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { G11nDebug, G11nModule, withInterceptor, withLocales, withOptions } from '@hug/ngx-g11n';
 import { withDateFnsMaterial } from '@hug/ngx-g11n/material';
@@ -26,11 +25,12 @@ export class AppRoutingModule { }
     declarations: [
         AppComponent
     ],
+    providers: [
+        provideHttpClient(withInterceptorsFromDi())
+    ],
     imports: [
         AppRoutingModule,
-        BrowserAnimationsModule,
         BrowserModule,
-        HttpClientModule,
         G11nModule.forRoot(
             withLocales({
                 'fr-CH': {

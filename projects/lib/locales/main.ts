@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { G11nFeature, G11nLocale, LOCALES } from '@hug/ngx-g11n/internal';
+import { type G11nFeature, type G11nLocale, LOCALES } from '@hug/ngx-g11n/internal';
 
 export const withDefaultLocales = (locales: Record<string, G11nLocale> = {}): G11nFeature => ({
     providers: [{

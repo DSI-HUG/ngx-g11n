@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { provideHttpClient } from '@angular/common/http';
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { type ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { G11nDebug, provideG11n, withInterceptor, withLocales, withOptions } from '@hug/ngx-g11n';
 import { withDateFnsMaterial } from '@hug/ngx-g11n/material';
@@ -12,7 +11,6 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideHttpClient(),
-        provideAnimations(),
         provideRouter(routes),
         provideG11n(
             withLocales({

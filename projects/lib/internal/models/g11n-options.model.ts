@@ -1,4 +1,4 @@
-import { G11nDebug } from './g11n-debug.enum';
+import type { G11nDebug } from './g11n-debug.enum';
 
 export interface G11nOptions {
     defaultLanguage?: string;

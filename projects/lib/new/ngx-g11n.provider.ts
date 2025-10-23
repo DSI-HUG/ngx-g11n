@@ -5,7 +5,7 @@ import { type EnvironmentProviders, inject, LOCALE_ID, makeEnvironmentProviders,
 import {
     DEFAULT_OPTIONS, G11N_OPTIONS, type G11nFeature, type G11nLocale, type G11nOptions, init, LOCALES
 } from '@hug/ngx-g11n/internal';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 export const withInterceptor = (): G11nFeature<EnvironmentProviders> => ({
     providers: [

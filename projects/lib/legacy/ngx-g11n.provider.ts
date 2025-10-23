@@ -5,7 +5,7 @@ import { inject, Injectable, LOCALE_ID, type Provider } from '@angular/core';
 import {
     DEFAULT_OPTIONS, G11N_OPTIONS, type G11nFeature, type G11nLocale, type G11nOptions, init, LOCALES
 } from '@hug/ngx-g11n/internal';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 @Injectable()
 class G11nInterceptor implements HttpInterceptor {

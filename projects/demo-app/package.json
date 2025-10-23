@@ -3,6 +3,7 @@
     "private": true,
     "scripts": {
         "start": "ng serve demo-app",
+        "lint": " ng lint demo-app",
         "test": "ng test demo-app",
         "extract-i18n": "ng extract-i18n demo-app",
         "build": "ng build demo-app -c production"

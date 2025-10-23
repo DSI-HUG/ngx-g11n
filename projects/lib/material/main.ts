@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import { APP_INITIALIZER, LOCALE_ID, Provider } from '@angular/core';
+
+import { APP_INITIALIZER, LOCALE_ID, type Provider } from '@angular/core';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { DateFnsAdapter, MAT_DATE_FNS_FORMATS } from '@angular/material-date-fns-adapter';
 import { type G11nFeature, type G11nLocale, LOCALES } from '@hug/ngx-g11n/internal';
-import { Locale, setDefaultOptions } from 'date-fns';
+import { type Locale, setDefaultOptions } from 'date-fns';
 
 const matDateFnsAdapter = (): Provider[] => [
     { provide: MAT_DATE_FORMATS, useValue: MAT_DATE_FNS_FORMATS },
     { provide: DateAdapter, useClass: DateFnsAdapter, deps: [MAT_DATE_LOCALE] },
     {
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         provide: APP_INITIALIZER,
         useFactory: (localeId: string, locales: Record<string, G11nLocale>, dateAdapter: DateAdapter<Date, Locale>) =>
             async (): Promise<void> => {

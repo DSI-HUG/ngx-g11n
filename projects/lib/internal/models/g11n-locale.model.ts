@@ -1,4 +1,4 @@
-import { DefaultModuleImport } from './default-module-import.model';
+import type { DefaultModuleImport } from './default-module-import.model';
 
 export interface G11nLocale {
     base: () => DefaultModuleImport;

@@ -1,5 +1,5 @@
 import { type EnvironmentProviders, type ModuleWithProviders, NgModule, type Provider } from '@angular/core';
-import { G11nFeature } from '@hug/ngx-g11n/internal';
+import type { G11nFeature } from '@hug/ngx-g11n/internal';
 
 import { provideG11n } from './ngx-g11n.provider';
 

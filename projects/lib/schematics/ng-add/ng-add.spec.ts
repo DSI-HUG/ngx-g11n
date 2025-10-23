@@ -1,9 +1,9 @@
-import { UnitTestTree } from '@angular-devkit/schematics/testing';
-import { ApplicationDefinition, getProjectFromWorkspace } from '@hug/ngx-schematics-utilities';
+import type { UnitTestTree } from '@angular-devkit/schematics/testing';
+import { type ApplicationDefinition, getProjectFromWorkspace } from '@hug/ngx-schematics-utilities';
 
 import { appTest1, appTest2, getCleanAppTree, runner } from '../schematics.spec';
 import { DEFAULT_OPTIONS } from '.';
-import { NgAddOptions } from './ng-add-options';
+import type { NgAddOptions } from './ng-add-options';
 
 [false, true].forEach(useStandalone => {
     [false, true].forEach(useWorkspace => {

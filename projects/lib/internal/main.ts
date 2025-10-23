@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { registerLocaleData } from '@angular/common';
 import { APP_INITIALIZER, DEFAULT_CURRENCY_CODE, inject, LOCALE_ID, type Provider } from '@angular/core';
 import { loadTranslations } from '@angular/localize';
@@ -39,14 +40,16 @@ export const setLanguage = (value: string): void => {
 const loadTranslationFile = async (filePath: string, debug: G11nDebug = G11nDebug.NO_DEBUG): Promise<void> => {
     const debugMode = (FORCE_DEBUG !== G11nDebug.NO_DEBUG) ? FORCE_DEBUG : debug;
     const response = await fetch(filePath);
-    const { translations } = await response.json() as G11nFile;
+    const { translations } = await response.json() as G11nFile | Record<string, undefined>;
     if (translations) {
         if (debugMode === G11nDebug.SHOW_KEYS) {
             Object.entries(translations).forEach(([key, value]) => {
                 translations[key] = `${value} (@${key})`;
             });
         } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
-            Object.keys(translations).forEach(key => translations[key] = '-');
+            Object.keys(translations).forEach(key => {
+                translations[key] = '-';
+            });
         }
         loadTranslations(translations);
     } else {
@@ -74,7 +77,7 @@ const loadLanguage = async (localeId: string, locales: Record<string, G11nLocale
 
     // Load translations
     if (options.useTranslations) {
-        await loadTranslationFile(`${options.translationsPath}/${localeId}.json`, options.debug);
+        await loadTranslationFile(`${options.translationsPath!}/${localeId}.json`, options.debug);
     }
 };
 
@@ -125,12 +128,13 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
         return options.defaultLanguage;
     }
 
-    throw new Error(`[@hug/ngx-g11n] Locale ${options.defaultLanguage} was not found in given locales`);
+    throw new Error(`[@hug/ngx-g11n] Locale ${options.defaultLanguage!} was not found in given locales`);
 };
 
 /**
  * We have to determine the query param name and export it globally as it will be used by the refreshUrl function, which
  * do not have access to the option object. We also have to support case-insensitive cases (ex: lang, Lang, LANG, etc.).
+ * @param options The G11N options.
  * @internal
  */
 const initQueryParamName = (options: G11nOptions): void => {
@@ -145,7 +149,9 @@ const initQueryParamName = (options: G11nOptions): void => {
 };
 
 /**
+ * Initializes G11N providers.
  * @internal
+ * @returns An array of Angular providers for G11N initialization.
  */
 export const init = (): Provider[] => [
     {
@@ -163,6 +169,7 @@ export const init = (): Provider[] => [
         deps: [G11N_OPTIONS]
     },
     {
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         provide: APP_INITIALIZER,
         useFactory: (localeId: string, locales: Record<string, G11nLocale>, options: G11nOptions) =>
             async (): Promise<void> => {
