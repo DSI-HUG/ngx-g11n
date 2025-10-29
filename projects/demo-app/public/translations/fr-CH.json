@@ -1,6 +1,12 @@
 {
     "locale": "fr-CH",
     "translations": {
+        "available": "Disponible",
+        "notAvailable": "Indisponible",
+        "languageSection": "Langue",
+        "storage": "Stockage",
+        "navigator": "Navigateur",
+        "default": "Par défaut",
         "dateSection": "Date (pipe)",
         "currencySection": "Monnaie (pipe)",
         "decimalSection": "Décimal (pipe)",

@@ -4,4 +4,5 @@ export interface G11nLocale {
     base: () => DefaultModuleImport;
     extra?: () => DefaultModuleImport;
     datefns?: () => DefaultModuleImport;
+    translationFilename?: string;
 }

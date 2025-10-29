@@ -204,7 +204,7 @@ provideG11n(withDefaultLocales())
 
 This feature will configure the library with the given locales.
 
-The `extra` and `datefns` are optionals and based on your personal requirements.
+The `extra`, `datefns` and `translationFilename` parameters are optionals and based on your personal requirements.
 
 ```ts
 // import { withLocales } from '@hug/ngx-g11n/legacy'; /* for ng14 apps */
@@ -214,7 +214,8 @@ provideG11n(withLocales({
   'fr-CH': {
     base: () => import('@angular/common/locales/fr-CH'),
     extra: () => import('@angular/common/locales/extra/fr-CH'),
-    datefns: () => import('date-fns/locale/fr-CH')
+    datefns: () => import('date-fns/locale/fr-CH'),
+    translationFilename: 'fr.json'
   }
 }))
 ```
@@ -263,7 +264,7 @@ interface G11nOptions {
     loadLocaleExtra?: boolean;
     /** @default true */
     useTranslations?: boolean;
-    /** @default '/translations' */
+    /** @default '/translations' ('/assets/translations' for legacy apps) */
     translationsPath?: string;
     /** @default 'lang' */
     queryParamName?: string;
@@ -275,6 +276,22 @@ interface G11nOptions {
 
 provideG11n(withOptions(options))
 ```
+
+
+## Heuristic
+
+The `language` to use is determined according to the following priorities, in order:
+
+1. Query parameter in the URL
+2. Browser storage
+3. Browser language
+4. Library setting
+
+And if a language is found using the above criteria:
+
+1. Check for an `exact` match in the **locales** provided to the library *(e.g., 'en-US')*
+2. Check for a match on the `base language` only *(e.g., 'en')*
+3. Check for a match on the `base language` with any `region` *(e.g., 'en-GB')*
 
 
 ## Debug

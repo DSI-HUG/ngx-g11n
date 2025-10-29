@@ -38,22 +38,24 @@ export const setLanguage = (value: string): void => {
 // --- HELPER(s) ---
 
 const loadTranslationFile = async (filePath: string, debug: G11nDebug = G11nDebug.NO_DEBUG): Promise<void> => {
-    const debugMode = (FORCE_DEBUG !== G11nDebug.NO_DEBUG) ? FORCE_DEBUG : debug;
+    const debugMode = FORCE_DEBUG !== G11nDebug.NO_DEBUG ? FORCE_DEBUG : debug;
     const response = await fetch(filePath);
-    const { translations } = await response.json() as G11nFile | Record<string, undefined>;
-    if (translations) {
-        if (debugMode === G11nDebug.SHOW_KEYS) {
-            Object.entries(translations).forEach(([key, value]) => {
-                translations[key] = `${value} (@${key})`;
-            });
-        } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
-            Object.keys(translations).forEach(key => {
-                translations[key] = '-';
-            });
+    if (response.status === 200) {
+        const { translations } = (await response.json()) as G11nFile | Record<string, undefined>;
+        if (translations) {
+            if (debugMode === G11nDebug.SHOW_KEYS) {
+                Object.entries(translations).forEach(([key, value]) => {
+                    translations[key] = `${value} (@${key})`;
+                });
+            } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
+                Object.keys(translations).forEach(key => {
+                    translations[key] = '-';
+                });
+            }
+            loadTranslations(translations);
+        } else {
+            throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
         }
-        loadTranslations(translations);
-    } else {
-        throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
     }
 };
 
@@ -63,7 +65,11 @@ const refreshUrl = (localeId: string): void => {
     history.pushState({}, '', newUrl); // update URL without reload
 };
 
-const loadLanguage = async (localeId: string, locales: Record<string, G11nLocale>, options: G11nOptions): Promise<void> => {
+const loadLanguage = async (
+    localeId: string,
+    locales: Record<string, G11nLocale>,
+    options: G11nOptions
+): Promise<void> => {
     // Sync language
     document.documentElement.lang = localeId;
     options.storage?.setItem(STORAGE_KEY, localeId);
@@ -72,17 +78,40 @@ const loadLanguage = async (localeId: string, locales: Record<string, G11nLocale
     // Register locale data
     const locale = locales[localeId];
     const localeBase = (await locale.base()).default;
-    const localeExtra = (options.loadLocaleExtra && locale.extra) ? (await locale.extra()).default : undefined;
+    const localeExtra = options.loadLocaleExtra && locale.extra ? (await locale.extra()).default : undefined;
     registerLocaleData(localeBase, localeId, localeExtra);
 
     // Load translations
     if (options.useTranslations) {
-        await loadTranslationFile(`${options.translationsPath!}/${localeId}.json`, options.debug);
+        const filename = locale.translationFilename ?? `${localeId}.json`;
+        await loadTranslationFile(`${options.translationsPath!}/${filename}`, options.debug);
     }
 };
 
 const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOptions): string => {
-    const localeIsSupported = (id: string): boolean => id in locales;
+    const getSupportedLocaleId = (localeId: string): string | undefined => {
+        // Priority 1: exact match
+        if (localeId in locales) {
+            return localeId;
+        }
+        // Priority 2: match on base language only
+        const locale = new Intl.Locale(localeId);
+        if (locale.language in locales) {
+            console.warn(
+                `[@hug/ngx-g11n] Locale "${localeId}" was not found in given locales (will use "${locale.language}" instead)`
+            );
+            return locale.language;
+        }
+        // Priority 3: match on base language with any region
+        const matchedLocale = Object.keys(locales).find(key => new Intl.Locale(key).language === locale.language);
+        if (matchedLocale) {
+            console.warn(
+                `[@hug/ngx-g11n] Locale "${localeId}" was not found in given locales (will use "${matchedLocale}" instead)`
+            );
+            return matchedLocale;
+        }
+        return undefined;
+    };
 
     /**
      * Initialize query param name
@@ -90,45 +119,63 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
      */
     initQueryParamName(options);
 
-    // Priority 1 : query param
+    // Priority 1: query param
     const localeIdFromUrl = new URL(location.href).searchParams.get(QUERY_PARAM_NAME);
     if (localeIdFromUrl) {
         if (localeIdFromUrl === 'keys') {
             FORCE_DEBUG = G11nDebug.SHOW_KEYS;
         } else if (localeIdFromUrl === 'dummy') {
             FORCE_DEBUG = G11nDebug.DUMMY_TRANSLATIONS;
-        } else if (localeIsSupported(localeIdFromUrl)) {
-            return localeIdFromUrl;
         } else {
-            console.warn(`[@hug/ngx-g11n] Locale ${localeIdFromUrl} from url was not found in given locales (will use storage if found)`);
+            const supportedLocaleId = getSupportedLocaleId(localeIdFromUrl);
+            if (supportedLocaleId) {
+                return supportedLocaleId;
+            } else {
+                console.warn(
+                    `[@hug/ngx-g11n] Locale "${localeIdFromUrl}" from url was not found in given locales (will use storage if found)`
+                );
+            }
         }
     }
 
-    // Priority 2 : storage
+    // Priority 2: storage
     const localeIdFromStorage = options.storage?.getItem(STORAGE_KEY);
     if (localeIdFromStorage) {
-        if (localeIsSupported(localeIdFromStorage)) {
-            return localeIdFromStorage;
+        const supportedLocaleId = getSupportedLocaleId(localeIdFromStorage);
+        if (supportedLocaleId) {
+            return supportedLocaleId;
         } else {
-            console.warn(`[@hug/ngx-g11n] Locale ${localeIdFromStorage} from storage was not found in given locales (will use navigator if enabled)`);
+            console.warn(
+                `[@hug/ngx-g11n] Locale "${localeIdFromStorage}" from storage was not found in given locales (will use navigator if enabled)`
+            );
         }
     }
 
-    // Priority 3 : browser
+    // Priority 3: browser
     if (options.useNavigatorLanguage) {
-        if (localeIsSupported(navigator.language)) {
-            return navigator.language;
+        const supportedLocaleId = getSupportedLocaleId(navigator.language);
+        if (supportedLocaleId) {
+            return supportedLocaleId;
         } else {
-            console.warn(`[@hug/ngx-g11n] Locale ${navigator.language} from browser was not found in given locales (will use default setting)`);
+            console.warn(
+                `[@hug/ngx-g11n] Locale "${navigator.language}" from browser was not found in given locales (will use default setting)`
+            );
         }
     }
 
-    // Priority 4 : default setting
-    if (options.defaultLanguage && localeIsSupported(options.defaultLanguage)) {
-        return options.defaultLanguage;
+    // Priority 4: user's setting
+    if (options.defaultLanguage) {
+        const supportedLocaleId = getSupportedLocaleId(options.defaultLanguage);
+        if (supportedLocaleId) {
+            return supportedLocaleId;
+        } else {
+            console.warn(
+                `[@hug/ngx-g11n] Locale "${options.defaultLanguage}" from user's setting was not found in given locales`
+            );
+        }
     }
 
-    throw new Error(`[@hug/ngx-g11n] Locale ${options.defaultLanguage!} was not found in given locales`);
+    throw new Error('[@hug/ngx-g11n] No provided locale was found');
 };
 
 /**
@@ -171,10 +218,11 @@ export const init = (): Provider[] => [
     {
         // eslint-disable-next-line @typescript-eslint/no-deprecated
         provide: APP_INITIALIZER,
-        useFactory: (localeId: string, locales: Record<string, G11nLocale>, options: G11nOptions) =>
-            async (): Promise<void> => {
-                await loadLanguage(localeId, locales, options);
-            },
+        useFactory:
+            (localeId: string, locales: Record<string, G11nLocale>, options: G11nOptions) =>
+                async (): Promise<void> => {
+                    await loadLanguage(localeId, locales, options);
+                },
         deps: [LOCALE_ID, LOCALES, G11N_OPTIONS],
         multi: true
     }

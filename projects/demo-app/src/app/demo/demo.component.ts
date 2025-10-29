@@ -26,6 +26,8 @@ import { format } from 'date-fns';
 export class DemoComponent implements OnInit {
     public currentLanguage = currentLanguage();
     public backendResponse: unknown;
+    public storage = window.localStorage;
+    public navigator = window.navigator;
 
     public currentDate = new Date();
     public dateFnsFormatted = format(this.currentDate, 'PPPP');

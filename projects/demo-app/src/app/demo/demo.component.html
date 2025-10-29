@@ -1,12 +1,28 @@
 <header>
+    <span i18n="@@available">-</span>:
     <button (click)="switchLanguage('fr-CH')">fr-CH</button>
     <button (click)="switchLanguage('de-CH')">de-CH</button>
     <button (click)="switchLanguage('en-US')">en-US</button>
-    <span>
-        Current:
-        <strong>{{ currentLanguage }}</strong>
-    </span>
+    <button (click)="switchLanguage('keys')">keys</button>
+    <button (click)="switchLanguage('dummy')">dummy</button>
+    <span i18n="@@notAvailable">-</span>:
+    <button (click)="switchLanguage('fr-CA')">fr-CA</button>
+    <button (click)="switchLanguage('de')">de</button>
+    <button (click)="switchLanguage('es')">es</button>
 </header>
+
+<section>
+    <strong i18n="@@languageSection">-</strong>
+    :
+    <span><strong>{{ currentLanguage }}</strong></span>
+    (
+    <span><span i18n="@@storage">-</span>: <strong>{{ storage.getItem('hug-ngx-g11n:lang') ?? 'N/A' }}</strong></span>
+    -
+    <span><span i18n="@@navigator">-</span>: <strong>{{ navigator.language }}</strong></span>
+    -
+    <span><span i18n="@@default">-</span>: <strong>fr-CH</strong></span>
+    )
+</section>
 
 <section>
     <strong i18n="@@dateSection">-</strong>
@@ -98,8 +114,11 @@
     <span>
         <mat-form-field>
             <mat-label i18n="@@angularMaterialDate">-</mat-label>
-            <input matInput [matDatepicker]="dp" [value]="currentDate" />
-            <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
+            <input matInput
+                   [matDatepicker]="dp"
+                   [value]="currentDate" />
+            <mat-datepicker-toggle matIconSuffix
+                                   [for]="dp"></mat-datepicker-toggle>
             <mat-datepicker #dp></mat-datepicker>
         </mat-form-field>
     </span>

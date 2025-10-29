@@ -1,6 +1,12 @@
 {
     "locale": "en-US",
     "translations": {
+        "available": "-",
+        "notAvailable": "-",
+        "languageSection": "-",
+        "storage": "-",
+        "navigator": "-",
+        "default": "-",
         "dateSection": "-",
         "currencySection": "-",
         "decimalSection": "-",
