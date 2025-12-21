@@ -12,5 +12,5 @@ export {
     G11nDebug,
     type G11nFeature,
     type G11nLocale,
-    type G11nOptions
+    type G11nOptions,
 } from './models';

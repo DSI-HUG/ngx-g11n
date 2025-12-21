@@ -11,22 +11,22 @@ import { routes } from './app.routes';
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    standalone: false
+    standalone: false,
 })
 export class AppComponent { }
 
 @NgModule({
     imports: [RouterModule.forRoot(routes)],
-    exports: [RouterModule]
+    exports: [RouterModule],
 })
 export class AppRoutingModule { }
 
 @NgModule({
     declarations: [
-        AppComponent
+        AppComponent,
     ],
     providers: [
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi()),
     ],
     imports: [
         AppRoutingModule,
@@ -36,26 +36,26 @@ export class AppRoutingModule { }
                 'fr-CH': {
                     base: () => import('@angular/common/locales/fr-CH'),
                     extra: () => import('@angular/common/locales/extra/fr-CH'),
-                    datefns: () => import('date-fns/locale/fr-CH')
+                    datefns: () => import('date-fns/locale/fr-CH'),
                 },
                 'de-CH': {
                     base: () => import('@angular/common/locales/de-CH'),
                     extra: () => import('@angular/common/locales/extra/de-CH'),
-                    datefns: () => import('date-fns/locale/de')
+                    datefns: () => import('date-fns/locale/de'),
                 },
                 'en-US': {
                     base: () => import('@angular/common/locales/en'),
                     extra: () => import('@angular/common/locales/extra/en'),
-                    datefns: () => import('date-fns/locale/en-US')
-                }
+                    datefns: () => import('date-fns/locale/en-US'),
+                },
             }),
             withDateFnsMaterial(),
             withInterceptor(),
             withOptions({
-                debug: G11nDebug.NO_DEBUG
-            })
-        )
+                debug: G11nDebug.NO_DEBUG,
+            }),
+        ),
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
 })
 export class AppModule { }

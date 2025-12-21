@@ -20,8 +20,8 @@ import { format } from 'date-fns';
         I18nPluralPipe,
         MatFormFieldModule,
         MatInputModule,
-        MatDatepickerModule
-    ]
+        MatDatepickerModule,
+    ],
 })
 export class DemoComponent implements OnInit {
     public currentLanguage = currentLanguage();
@@ -37,7 +37,7 @@ export class DemoComponent implements OnInit {
     public messageMapping = {
         '=0': $localize`:@@pluralNoMessage:-`,
         '=1': $localize`:@@pluralOneMessage:-`,
-        'other': $localize`:@@pluralMultipleMessages:-`
+        'other': $localize`:@@pluralMultipleMessages:-`,
     };
 
     // ---

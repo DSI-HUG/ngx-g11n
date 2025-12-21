@@ -23,7 +23,7 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     translationsPath: '/translations',
     queryParamName: QUERY_PARAM_NAME,
     storage: localStorage,
-    debug: G11nDebug.NO_DEBUG
+    debug: G11nDebug.NO_DEBUG,
 };
 
 // ---
@@ -68,7 +68,7 @@ const refreshUrl = (localeId: string): void => {
 const loadLanguage = async (
     localeId: string,
     locales: Record<string, G11nLocale>,
-    options: G11nOptions
+    options: G11nOptions,
 ): Promise<void> => {
     // Sync language
     document.documentElement.lang = localeId;
@@ -98,7 +98,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
         const locale = new Intl.Locale(localeId);
         if (locale.language in locales) {
             console.warn(
-                `[@hug/ngx-g11n] Locale "${localeId}" was not found in given locales (will use "${locale.language}" instead)`
+                `[@hug/ngx-g11n] Locale "${localeId}" was not found in given locales (will use "${locale.language}" instead)`,
             );
             return locale.language;
         }
@@ -106,7 +106,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
         const matchedLocale = Object.keys(locales).find(key => new Intl.Locale(key).language === locale.language);
         if (matchedLocale) {
             console.warn(
-                `[@hug/ngx-g11n] Locale "${localeId}" was not found in given locales (will use "${matchedLocale}" instead)`
+                `[@hug/ngx-g11n] Locale "${localeId}" was not found in given locales (will use "${matchedLocale}" instead)`,
             );
             return matchedLocale;
         }
@@ -132,7 +132,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
                 return supportedLocaleId;
             } else {
                 console.warn(
-                    `[@hug/ngx-g11n] Locale "${localeIdFromUrl}" from url was not found in given locales (will use storage if found)`
+                    `[@hug/ngx-g11n] Locale "${localeIdFromUrl}" from url was not found in given locales (will use storage if found)`,
                 );
             }
         }
@@ -146,7 +146,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
             return supportedLocaleId;
         } else {
             console.warn(
-                `[@hug/ngx-g11n] Locale "${localeIdFromStorage}" from storage was not found in given locales (will use navigator if enabled)`
+                `[@hug/ngx-g11n] Locale "${localeIdFromStorage}" from storage was not found in given locales (will use navigator if enabled)`,
             );
         }
     }
@@ -158,7 +158,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
             return supportedLocaleId;
         } else {
             console.warn(
-                `[@hug/ngx-g11n] Locale "${navigator.language}" from browser was not found in given locales (will use default setting)`
+                `[@hug/ngx-g11n] Locale "${navigator.language}" from browser was not found in given locales (will use default setting)`,
             );
         }
     }
@@ -170,7 +170,7 @@ const getLocaleToUse = (locales: Record<string, G11nLocale>, options: G11nOption
             return supportedLocaleId;
         } else {
             console.warn(
-                `[@hug/ngx-g11n] Locale "${options.defaultLanguage}" from user's setting was not found in given locales`
+                `[@hug/ngx-g11n] Locale "${options.defaultLanguage}" from user's setting was not found in given locales`,
             );
         }
     }
@@ -203,17 +203,17 @@ const initQueryParamName = (options: G11nOptions): void => {
 export const init = (): Provider[] => [
     {
         provide: G11N_OPTIONS,
-        useValue: DEFAULT_OPTIONS
+        useValue: DEFAULT_OPTIONS,
     },
     {
         provide: LOCALE_ID,
         useFactory: getLocaleToUse,
-        deps: [LOCALES, G11N_OPTIONS]
+        deps: [LOCALES, G11N_OPTIONS],
     },
     {
         provide: DEFAULT_CURRENCY_CODE,
         useFactory: (options: G11nOptions) => options.defaultCurrency ?? DEFAULT_OPTIONS.defaultCurrency,
-        deps: [G11N_OPTIONS]
+        deps: [G11N_OPTIONS],
     },
     {
         // eslint-disable-next-line @typescript-eslint/no-deprecated
@@ -224,6 +224,6 @@ export const init = (): Provider[] => [
                     await loadLanguage(localeId, locales, options);
                 },
         deps: [LOCALE_ID, LOCALES, G11N_OPTIONS],
-        multi: true
-    }
+        multi: true,
+    },
 ];

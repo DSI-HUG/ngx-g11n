@@ -18,7 +18,7 @@ import type { NgAddOptions } from './ng-add-options';
                 nbFiles = tree.files.length;
                 defaultOptions = {
                     project: (useWorkspace) ? appTest2.name : appTest1.name,
-                    ...DEFAULT_OPTIONS
+                    ...DEFAULT_OPTIONS,
                 } as NgAddOptions;
                 project = await getProjectFromWorkspace(tree, defaultOptions.project);
             });

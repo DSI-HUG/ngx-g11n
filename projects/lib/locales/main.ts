@@ -8,14 +8,14 @@ export const withDefaultLocales = (locales: Record<string, G11nLocale> = {}): G1
             'fr-CH': {
                 base: () => import('@angular/common/locales/fr-CH'),
                 extra: () => import('@angular/common/locales/extra/fr-CH'),
-                datefns: () => import('date-fns/locale/fr-CH')
+                datefns: () => import('date-fns/locale/fr-CH'),
             },
             'de-CH': {
                 base: () => import('@angular/common/locales/de-CH'),
                 extra: () => import('@angular/common/locales/extra/de-CH'),
-                datefns: () => import('date-fns/locale/de')
+                datefns: () => import('date-fns/locale/de'),
             },
-            ...locales
-        }
-    }]
+            ...locales,
+        },
+    }],
 });

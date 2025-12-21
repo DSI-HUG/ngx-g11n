@@ -20,12 +20,12 @@ const matDateFnsAdapter = (): Provider[] => [
                 }
             },
         deps: [LOCALE_ID, LOCALES, DateAdapter],
-        multi: true
-    }
+        multi: true,
+    },
 ];
 
 export const withDateFnsMaterial = (): G11nFeature => ({
     providers: [
-        matDateFnsAdapter()
-    ]
+        matDateFnsAdapter(),
+    ],
 });

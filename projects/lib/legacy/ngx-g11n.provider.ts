@@ -1,9 +1,9 @@
 import {
-    HTTP_INTERCEPTORS, type HttpEvent, type HttpHandler, type HttpInterceptor, type HttpRequest
+    HTTP_INTERCEPTORS, type HttpEvent, type HttpHandler, type HttpInterceptor, type HttpRequest,
 } from '@angular/common/http';
 import { inject, Injectable, LOCALE_ID, type Provider } from '@angular/core';
 import {
-    DEFAULT_OPTIONS, G11N_OPTIONS, type G11nFeature, type G11nLocale, type G11nOptions, init, LOCALES
+    DEFAULT_OPTIONS, G11N_OPTIONS, type G11nFeature, type G11nLocale, type G11nOptions, init, LOCALES,
 } from '@hug/ngx-g11n/internal';
 import type { Observable } from 'rxjs';
 
@@ -18,24 +18,24 @@ class G11nInterceptor implements HttpInterceptor {
 
 export const withInterceptor = (): G11nFeature => ({
     providers: [
-        { provide: HTTP_INTERCEPTORS, useClass: G11nInterceptor, multi: true, deps: [LOCALE_ID] }
-    ]
+        { provide: HTTP_INTERCEPTORS, useClass: G11nInterceptor, multi: true, deps: [LOCALE_ID] },
+    ],
 });
 
 export const withLocales = (locales: Record<string, G11nLocale>): G11nFeature => ({
     providers: [
-        { provide: LOCALES, useValue: locales }
-    ]
+        { provide: LOCALES, useValue: locales },
+    ],
 });
 
 export const withOptions = (options: G11nOptions): G11nFeature => ({
     providers: [
-        { provide: G11N_OPTIONS, useValue: { ...DEFAULT_OPTIONS, translationsPath: '/assets/translations', ...options } }
-    ]
+        { provide: G11N_OPTIONS, useValue: { ...DEFAULT_OPTIONS, translationsPath: '/assets/translations', ...options } },
+    ],
 });
 
 export const provideG11n = (...features: G11nFeature[]): Provider[] => [
     init(),
     withOptions({ translationsPath: '/assets/translations' }).providers,
-    features.map(feature => feature.providers)
+    features.map(feature => feature.providers),
 ];

@@ -9,8 +9,8 @@ export class G11nModule {
         return {
             ngModule: G11nModule,
             providers: [
-                provideG11n(...features)
-            ]
+                provideG11n(...features),
+            ],
         };
     }
 }

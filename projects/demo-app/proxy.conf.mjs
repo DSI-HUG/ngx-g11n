@@ -9,10 +9,10 @@ export default {
         bypass: (req, res) => {
             res.end(
                 JSON.stringify({
-                    g11n: req.headers['accept-language']
-                })
+                    g11n: req.headers['accept-language'],
+                }),
             );
             return true;
-        }
-    }
+        },
+    },
 };

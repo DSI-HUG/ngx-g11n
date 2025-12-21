@@ -4,5 +4,5 @@ import { routes as demoRoutes } from './demo/demo.routes';
 
 export const routes: Routes = [
     { path: '', children: demoRoutes },
-    { path: '**', pathMatch: 'full', redirectTo: '' }
+    { path: '**', pathMatch: 'full', redirectTo: '' },
 ];

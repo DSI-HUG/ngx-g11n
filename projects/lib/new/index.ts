@@ -6,5 +6,5 @@ export {
     G11nDebug,
     type G11nLocale,
     type G11nOptions,
-    setLanguage
+    setLanguage,
 } from '@hug/ngx-g11n/internal';

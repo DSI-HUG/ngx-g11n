@@ -13,7 +13,7 @@ import {
     modifyJsonFile,
     packageInstallTask,
     schematic,
-    workspace
+    workspace,
 } from '@hug/ngx-schematics-utilities';
 import { join } from 'node:path';
 
@@ -34,13 +34,13 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     useNavigatorLanguage: true,
     loadLocaleExtra: false,
     translationsPath: '/translations',
-    queryParamName: 'lang'
+    queryParamName: 'lang',
 };
 
 const customizeProject = (
     { project, tree }: ChainableApplicationContext,
     options: NgAddOptions,
-    ngVersion: Version
+    ngVersion: Version,
 ): Rule => {
     const rules: Rule[] = [];
 
@@ -56,14 +56,14 @@ const customizeProject = (
             modifyJsonFile(
                 'angular.json',
                 [...extractOptionsPath, 'outputPath'],
-                join(project.assetsPath, options.translationsPath)
-            )
+                join(project.assetsPath, options.translationsPath),
+            ),
         );
     }
     rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'outFile'], `${options.defaultLanguage}.json`));
     rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'format'], 'json'));
     rules.push(
-        modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage)
+        modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage),
     );
 
     // Provide library
@@ -166,12 +166,12 @@ export default (options: NgAddOptions): Rule =>
                                 addPackageJsonDependencies([
                                     {
                                         name: '@angular/material-date-fns-adapter',
-                                        version: `^${ngVersion.major}.0.0`
-                                    }
+                                        version: `^${ngVersion.major}.0.0`,
+                                    },
                                 ]),
-                                packageInstallTask()
+                                packageInstallTask(),
                             ])
-                            : noop()
+                            : noop(),
                     )
                     .toRule(),
 
@@ -183,8 +183,8 @@ export default (options: NgAddOptions): Rule =>
                         return deployFiles(options, './files', join(project.assetsPath, options.translationsPath));
                     })
                     .rule(context => customizeProject(context, options, ngVersion))
-                    .toRule()
+                    .toRule(),
             ],
-            options
+            options,
         );
     };
