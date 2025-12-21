@@ -135,7 +135,7 @@
                     "defaultConfiguration": "production"
                 },
                 "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
+                    "builder": "@angular/build:karma",
                     "configurations": {
                         "ci": {
                             "browsers": "ChromeHeadless",
