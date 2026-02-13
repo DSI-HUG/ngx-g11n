@@ -68,7 +68,7 @@ ng add @hug/ngx-g11n
 >     "projects": {
 >       "my-app": {
 >         "i18n" {
->           "sourceLocale": "fr-CH"
+>            "sourceLocale": "fr-CH"
 >         },
 >         "architect": {
 >           "build": {
@@ -76,12 +76,12 @@ ng add @hug/ngx-g11n
 >               "i18nMissingTranslation": "error"
 >             }
 >           },
->           "extract-i18n": {
->             "builder": "@angular/build:extract-i18n",
+>           "extract-g11n": {
+>             "builder": "@hug/ngx-g11n:extract-i18n",
 >             "options": {
 >               "outputPath": "projects/demo-app/public/i18n",
 >               "outFile": "fr-CH.json",
->               "format": "json"
+>               "exclusionKeyPrefixes": [ "_" ]
 >             }
 >           }
 >         }
@@ -127,6 +127,91 @@ Then use the command `ng extract-i18n` to extract the marked messages from your 
 const msgToTranslate = $localize`:@@demoText:Message to translate`;
 ```
 
+## Builder extract-g11n
+The extract-g11n builder is an Angular CLI builder that:
+
+* Runs Angular’s built‑in i18n extraction
+* Outputs JSON translations at provided outpuPath
+* Cleans extracted keys by removing all translations matching configurable exclusion prefixes (ex: "_")
+* Does NOT require defining extract-i18n in your app’s angular.json
+
+> **Made for Git submodules:**  
+> This builder was designed to support projects that embed **Git submodules** containing their own translation keys.  
+> Submodule-owned keys can be automatically removed after extraction using the `exclusionKeyPrefixes` option.  
+> Works only with `json` translation files.
+
+
+### Configuration in angular.json
+```json
+"projects": {
+  "my-app": {
+    "architect": {
+      "extract-g11n": {
+        "builder": "@hug/ngx-g11n:extract-i18n",
+        "options": {
+          "outputPath": "projects/demo-app/public/i18n",
+          "outFile": "fr-CH.json",
+          "format": "json",
+          "exclusionKeyPrefixes": [ "_" ],
+          "backUpExcludedKeys": true
+        }
+      }
+    }
+  }
+}
+```
+
+### Options
+| Name | Type | Description | Values | Required | Default value
+|---|---|---|---|---|---|
+| outputPath | string |  Path where output will be placed.| - | Yes | - |
+| outFile | string | Name of the file to output. | - | Yes | - |
+| format | string | Output format for the generated file. | xmb, xlf, xlif, xliff, xlf2, xliff2, json, arb, legacy-migrate | Yes | json |
+| exclusionKeyPrefixes | string[] | List of key prefixes to remove after i18n extraction | - | No | [ "_" ] |
+| backUpExcludedKeys | boolean | Whether to create a backup of excluded keys in a separate file. | true, false | No | false |
+
+> **Recommendation:**  
+> Prefix all submodule-provided translation keys with "_" (e.g., "_featureTitle")  
+> Then set:  
+> 
+> ```json
+> "exclusionKeyPrefixes": ["_"]
+> ```  
+> 
+> So these submodule keys are automatically removed during extraction.
+
+> **💡Extraction tips:**  
+> Set:  
+> 
+> ```json
+> "backUpExcludedKeys": true
+> ```  
+> 
+> To backed up all removed keys at outputPath location 
+
+
+### 🚀 Running the builder
+
+#### Via Angular CLI:
+```sh
+npm run my-app:extract-g11n
+```
+
+#### Via NPM script:
+Add this to package.json:
+```json
+
+{
+  "scripts": {
+    "g11n": "ng run my-app:extract-g11n"
+  }
+}
+
+```
+Then run
+```sh
+npm run g11n
+```
 
 ## Helpers
 

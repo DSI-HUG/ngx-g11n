@@ -12,6 +12,7 @@ import {
     logError,
     modifyJsonFile,
     packageInstallTask,
+    removeFromJsonFile,
     schematic,
     workspace,
 } from '@hug/ngx-schematics-utilities';
@@ -49,22 +50,34 @@ const customizeProject = (
         rules.push(modifyJsonFile('tsconfig.json', ['angularCompilerOptions', 'skipLibCheck'], true));
     }
 
+    // package.json
+    rules.push(modifyJsonFile('package.json', ['scripts', 'g11n'], `ng run ${project.name}:extract-g11n`));
+
     // angular.json
-    const extractOptionsPath = ['projects', project.name, 'architect', 'extract-i18n', 'options'];
+    // Remove if exists extract-i18n builder
+    const extractI18nBuilderPath = ['projects', project.name, 'architect', 'extract-i18n'];
+    rules.push(removeFromJsonFile('angular.json', [...extractI18nBuilderPath]));
+
+    // Add extract-g11n builder
+    const extractG11nPath = ['projects', project.name, 'architect', 'extract-g11n'];
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'builder'], '@hug/ngx-g11n:extract-g11n'));
     if (project.assetsPath) {
         rules.push(
             modifyJsonFile(
                 'angular.json',
-                [...extractOptionsPath, 'outputPath'],
+                [...extractG11nPath, 'options', 'outputPath'],
                 join(project.assetsPath, options.translationsPath),
+                () => 0,
             ),
         );
     }
-    rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'outFile'], `${options.defaultLanguage}.json`));
-    rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'format'], 'json'));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outFile'], `${options.defaultLanguage}.json`, () => 1));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'format'], 'json', () => 2));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'exclusionKeyPrefixes'], ['_'], () => 3));
     rules.push(
         modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage),
     );
+
 
     // Provide library
     let configFile: string | null;

@@ -1,0 +1,10 @@
+
+{
+  "builders": {
+    "extract-g11n": {
+      "implementation": "./builders/extract-g11n/index.js",
+      "schema": "./builders/extract-g11n/schema.json",
+      "description": "Runs extract-i18n with overrides and cleans extracted submodule keys"
+    }
+  }
+}
