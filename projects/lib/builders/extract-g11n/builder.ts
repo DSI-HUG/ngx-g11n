@@ -85,9 +85,16 @@ const runExtractedFileCleanUp = (options: ExtractG11nOptions, context: BuilderCo
 
             if (Object.keys(removedValues).length !== 0) {
                 if (options.backUpExcludedKeys) {
-                    const ns = process.hrtime.bigint().toString();
+                    const now = new Date();
+                    const ts = [
+                        String(now.getFullYear()),
+                        String(now.getMonth() + 1).padStart(2, '0'),
+                        String(now.getDate()).padStart(2, '0'),
+                        String(now.getHours()).padStart(2, '0'),
+                        String(now.getMinutes()).padStart(2, '0'),
+                    ].join('');
 
-                    const backupFile = `${file}-backup-${ns}.json`;
+                    const backupFile = `${file.replace(/\.json$/, '')}_${ts}.bak.json`;
                     writeJsonAtomic(backupFile, removedValues);
                     logging('info', context, `Excluded keys backed up into: ${backupFile}`);
                 }
@@ -120,7 +127,7 @@ const findJsonFiles = (pattern: string): string[] => {
     const results: string[] = [];
 
     Object.entries(entries).forEach(([_, entry]) => {
-        if (entry.isFile() && (/^(?!.*backup-\d+\.json$)[^.].*\.json$/i.test(entry.name))) {
+        if (entry.isFile() && (/^(?!.*_\d+\.bak\.json$)[^.].*\.json$/i.test(entry.name))) {
             results.push(path.join(directory, entry.name));
         }
     });
