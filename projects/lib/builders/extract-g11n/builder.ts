@@ -75,36 +75,34 @@ const runExtractedFileCleanUp = (options: ExtractG11nOptions, context: BuilderCo
     const pattern = path.join(options.outputPath, '*.json');
     const files = findJsonFiles(pattern);
 
-    // eslint-disable-next-line no-loops/no-loops
-    for (const file of files) {
-
+    Object.entries(files).forEach(([_, file]) => {
         logging('debug', context, `Processing: ${file}…`);
 
         const read = safeReadJson(file);
 
-        if (!read.ok) {
+        if (read.ok) {
+            const { updated, removedValues } = removeByPrefixes(read.data, options.exclusionKeyPrefixes);
+
+            if (Object.keys(removedValues).length !== 0) {
+                if (options.backUpExcludedKeys) {
+                    const ns = process.hrtime.bigint().toString();
+
+                    const backupFile = `${file}-backup-${ns}.json`;
+                    writeJsonAtomic(backupFile, removedValues);
+                    logging('info', context, `Excluded keys backed up into: ${backupFile}`);
+                }
+
+                writeJsonAtomic(file, updated);
+
+                logging('info', context, `→ Cleaned ${file}`);
+            } else {
+                logging('info', context, `→ No matching keys to remove in: ${file}`);
+            }
+        } else {
             context.logger.warn(`→ Skipping invalid JSON (${file}): ${read.error}`);
-            continue;
         }
+    });
 
-        const { updated, removedValues } = removeByPrefixes(read.data, options.exclusionKeyPrefixes);
-
-        if (Object.keys(removedValues).length === 0) {
-            logging('info', context, `→ No matching keys to remove in: ${file}`);
-            continue;
-        }
-
-        if (options.backUpExcludedKeys) {
-            const backupFile = `${file}-backup.json`;
-            writeJsonAtomic(backupFile, removedValues);
-            logging('info', context, `Excluded keys backed up into: ${backupFile}`);
-        }
-
-        writeJsonAtomic(file, updated);
-
-        logging('info', context, `→ Cleaned ${file}`);
-
-    }
     logging('success', context, '✔ Cleanup completed');
 };
 
@@ -121,12 +119,11 @@ const findJsonFiles = (pattern: string): string[] => {
 
     const results: string[] = [];
 
-    // eslint-disable-next-line no-loops/no-loops
-    for (const entry of entries) {
-        if (entry.isFile() && (/^(?!.*backup\.json$)[^.].*\.json$/i.test(entry.name))) {
+    Object.entries(entries).forEach(([_, entry]) => {
+        if (entry.isFile() && (/^(?!.*backup-\d+\.json$)[^.].*\.json$/i.test(entry.name))) {
             results.push(path.join(directory, entry.name));
         }
-    }
+    });
 
     return results;
 };
@@ -158,14 +155,14 @@ const removeByPrefixes = (data: unknown, prefixes: string[]): { updated: unknown
     const removedValues: Record<string, unknown> = {};
     const cleanedEntries: [string, unknown][] = [];
 
-    // eslint-disable-next-line no-loops/no-loops
-    for (const [key, value] of Object.entries(translations)) {
+    Object.entries(translations).forEach(([key, value]) => {
         if (startsWithAny(key)) {
             removedValues[key] = value;
-            continue;
+        } else {
+            cleanedEntries.push([key, value]);
         }
-        cleanedEntries.push([key, value]);
-    }
+    });
+
     const updated: Record<string, unknown> = { ...data, translations: Object.fromEntries(cleanedEntries) };
 
     return { updated, removedValues };
