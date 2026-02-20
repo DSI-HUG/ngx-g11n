@@ -77,9 +77,9 @@ ng add @hug/ngx-g11n
 >             }
 >           },
 >           "extract-g11n": {
->             "builder": "@hug/ngx-g11n:extract-i18n",
+>             "builder": "@hug/ngx-g11n:extract-g11n",
 >             "options": {
->               "outputPath": "projects/demo-app/public/i18n",
+>               "outputPath": "projects/my-app/translations",
 >               "outFile": "fr-CH.json",
 >               "exclusionKeyPrefixes": [ "_" ]
 >             }
@@ -147,9 +147,9 @@ The extract-g11n builder is an Angular CLI builder that:
   "my-app": {
     "architect": {
       "extract-g11n": {
-        "builder": "@hug/ngx-g11n:extract-i18n",
+        "builder": "@hug/ngx-g11n:extract-g11n",
         "options": {
-          "outputPath": "projects/demo-app/public/i18n",
+          "outputPath": "projects/my-app/translations",
           "outFile": "fr-CH.json",
           "format": "json",
           "exclusionKeyPrefixes": [ "_" ],
@@ -167,7 +167,7 @@ The extract-g11n builder is an Angular CLI builder that:
 | outputPath | string |  Path where output will be placed.| - | Yes | - |
 | outFile | string | Name of the file to output. | - | Yes | - |
 | format | string | Output format for the generated file. | xmb, xlf, xlif, xliff, xlf2, xliff2, json, arb, legacy-migrate | Yes | json |
-| exclusionKeyPrefixes | string[] | List of key prefixes to remove after i18n extraction | - | No | [ "_" ] |
+| exclusionKeyPrefixes | string[] | List of key prefixes to remove after i18n extraction | - | No | [  ] |
 | backUpExcludedKeys | boolean | Whether to create a backup of excluded keys in a separate file. | true, false | No | false |
 
 > **Recommendation:**  

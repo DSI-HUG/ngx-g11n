@@ -51,6 +51,8 @@ const customizeProject = (
     }
 
     // package.json
+    // Remove if exists i18n script
+    rules.push(removeFromJsonFile('package.json', ['scripts', 'i18n']));
     rules.push(modifyJsonFile('package.json', ['scripts', 'g11n'], `ng run ${project.name}:extract-g11n`));
 
     // angular.json
@@ -60,20 +62,16 @@ const customizeProject = (
 
     // Add extract-g11n builder
     const extractG11nPath = ['projects', project.name, 'architect', 'extract-g11n'];
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'builder'], '@hug/ngx-g11n:extract-g11n'));
     if (project.assetsPath) {
-        rules.push(
-            modifyJsonFile(
-                'angular.json',
-                [...extractG11nPath, 'options', 'outputPath'],
-                join(project.assetsPath, options.translationsPath),
-                () => 0,
-            ),
-        );
+        rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outputPath'],
+            join(project.assetsPath, options.translationsPath), () => 0));
     }
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outFile'], `${options.defaultLanguage}.json`, () => 1));
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'format'], 'json', () => 2));
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'exclusionKeyPrefixes'], ['_'], () => 3));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outFile'], `${options.defaultLanguage}.json`, () => 0));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'format'], 'json', () => 1));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'exclusionKeyPrefixes'], ['_'], () => 2));
+
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'builder'], '@hug/ngx-g11n:extract-g11n', () => 0));
+
     rules.push(
         modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage),
     );
