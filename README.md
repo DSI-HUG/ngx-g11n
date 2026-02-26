@@ -103,7 +103,7 @@ ng update @hug/ngx-g11n
 
 This library uses the official [@angular/localize][angular-localize-url] package under the hood, so manage your translations just as you would with it.
 
-Then use the command `ng extract-i18n` to extract the marked messages from your components into a single source language file.
+Then use the command `npm run g11n` to extract the marked messages from your components into a single source language file.
 
 #### Examples
 
@@ -135,9 +135,9 @@ The extract-g11n builder is an Angular CLI builder that:
 * Cleans extracted keys by removing all translations matching configurable exclusion prefixes (ex: "_")
 * Does NOT require defining extract-i18n in your app’s angular.json
 
-> **Made for Git submodules:**  
-> This builder was designed to support projects that embed **Git submodules** containing their own translation keys.  
-> Submodule-owned keys can be automatically removed after extraction using the `exclusionKeyPrefixes` option.  
+> **Made for projects with embedded translation files:** 
+> This builder is designed to support projects that include **multiple translation sources**, each containing their own translation keys.
+> Keys originating from embedded translation files can be automatically removed after extraction using the `exclusionKeyPrefixes` option.
 > Works only with `json` translation files.
 
 
@@ -171,14 +171,14 @@ The extract-g11n builder is an Angular CLI builder that:
 | backUpExcludedKeys | boolean | Whether to create a backup of excluded keys in a separate file. | true, false | No | false |
 
 > **Recommendation:**  
-> Prefix all submodule-provided translation keys with "_" (e.g., "_featureTitle")  
+> Prefix all embedded translation keys with "_" (e.g., "_featureTitle")  
 > Then set:  
 > 
 > ```json
 > "exclusionKeyPrefixes": ["_"]
 > ```  
 > 
-> So these submodule keys are automatically removed during extraction.
+> So these keys are automatically removed during extraction.
 
 > **💡Extraction tips:**  
 > Set:  

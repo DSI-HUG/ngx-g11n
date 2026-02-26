@@ -46,7 +46,7 @@ const copySchematicsAssets = async () => {
 };
 const copyBuildersAssets = async () => {
     log('> Copying builders assets..');
-    await cpy(`${__dirname}/builders.json`, `${DIST_PATH}`, { flat: true });
+    await cpy(`${BUILDERS_SRC_PATH}/builders.json`, `${DIST_PATH}/builders`, { flat: true });
 };
 const copyExtractG11nBuilderAssets = async () => {
     await cpy(`${EXTRACT_G11N_BUILDER_SRC_PATH}/schema.json`, `${DIST_PATH}/builders/extract-g11n`, { flat: true });
