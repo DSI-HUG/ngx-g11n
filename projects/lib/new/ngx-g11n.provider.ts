@@ -3,7 +3,7 @@ import {
 } from '@angular/common/http';
 import { type EnvironmentProviders, inject, LOCALE_ID, makeEnvironmentProviders, type Provider } from '@angular/core';
 import {
-    DEFAULT_OPTIONS, G11N_OPTIONS, G11N_SUBMODULES, type G11nFeature, type G11nLocale, type G11nOptions, type G11nSubmodule, init, LOCALES,
+    DEFAULT_OPTIONS, G11N_OPTIONS, type G11nFeature, type G11nLocale, type G11nOptions, init, LOCALES,
 } from '@hug/ngx-g11n/internal';
 import type { Observable } from 'rxjs';
 
@@ -27,12 +27,6 @@ export const withLocales = (locales: Record<string, G11nLocale>): G11nFeature =>
 export const withOptions = (options: G11nOptions): G11nFeature => ({
     providers: [
         { provide: G11N_OPTIONS, useValue: { ...DEFAULT_OPTIONS, ...options } },
-    ],
-});
-
-export const withSubmodules = (submodules: G11nSubmodule[]): G11nFeature => ({
-    providers: [
-        { provide: G11N_SUBMODULES, useValue: submodules },
     ],
 });
 

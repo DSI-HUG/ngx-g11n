@@ -4,8 +4,8 @@ import { registerLocaleData } from '@angular/common';
 import { APP_INITIALIZER, DEFAULT_CURRENCY_CODE, inject, LOCALE_ID, type Provider } from '@angular/core';
 import { loadTranslations } from '@angular/localize';
 
-import { G11N_OPTIONS, G11N_SUBMODULES, LOCALES } from '.';
-import { G11nDebug, type G11nFile, type G11nLocale, type G11nOptions, type G11nSubmodule } from './models';
+import { G11N_OPTIONS, LOCALES } from '.';
+import { G11nDebug, type G11nFile, type G11nLocale, type G11nOptions } from './models';
 
 const STORAGE_KEY = 'hug-ngx-g11n:lang';
 let QUERY_PARAM_NAME = 'lang';
@@ -37,62 +37,43 @@ export const setLanguage = (value: string): void => {
 
 // --- HELPER(s) ---
 
-const loadTranslationFile = async (filePath: string, localeId: string, debug: G11nDebug = G11nDebug.NO_DEBUG, submodules: G11nSubmodule[] = []): Promise<void> => {
+const loadTranslationFiles = async (options: G11nOptions, filename: string, debug: G11nDebug = G11nDebug.NO_DEBUG): Promise<void> => {
     const debugMode = FORCE_DEBUG !== G11nDebug.NO_DEBUG ? FORCE_DEBUG : debug;
-    const response = await fetch(filePath);
+    const paths = Array.isArray(options.translationsPath) ? options.translationsPath : [options.translationsPath!];
+    const filePaths = paths.map(path => `${path}/${filename}`);
+    const translations = await loadMergedFiles(filePaths);
 
-    if (response.status === 200) {
-        let { translations } = (await response.json()) as G11nFile | Record<string, undefined>;
+    loadTranslations(translations);
 
-        if (translations) {
-
-            if (submodules.length) {
-                translations = await loadMergedFile(translations, localeId, submodules);
-            }
-
-            loadTranslations(translations);
-
-            if (debugMode === G11nDebug.SHOW_KEYS) {
-                Object.entries(translations).forEach(([key, value]) => {
-                    translations![key] = `${value} (@${key})`;
-                });
-            } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
-                Object.keys(translations).forEach(key => {
-                    translations![key] = '-';
-                });
-            }
-        } else {
-            throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
-        }
+    if (debugMode === G11nDebug.SHOW_KEYS) {
+        Object.entries(translations).forEach(([key, value]) => {
+            translations[key] = `${value} (@${key})`;
+        });
+    } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
+        Object.keys(translations).forEach(key => {
+            translations[key] = '-';
+        });
     }
 };
 
-const loadMergedFile = async (translations: Record<string, string>, localeId: string, submodules: G11nSubmodule[]): Promise<Record<string, string>> => {
-    const mergedTranslations: Record<string, string> = { ...translations };
+const loadMergedFiles = async (filePaths: string[]): Promise<Record<string, string>> => {
+    const mergedTranslations: Record<string, string> = {};
 
     // eslint-disable-next-line no-loops/no-loops
-    for (const sm of submodules) {
-        const subTranslationsResponse = await fetch(`${sm.translationsPath}/${localeId}.json`);
+    for (const filePath of filePaths) {
+        const response = await fetch(filePath);
 
-        if (subTranslationsResponse.status === 200) {
-            const { translations: subTranslations } = (await subTranslationsResponse.json()) as G11nFile | Record<string, undefined>;
+        if (response.status === 200) {
+            const { translations } = (await response.json()) as G11nFile | Record<string, undefined>;
 
-            if (subTranslations) {
-                // eslint-disable-next-line no-loops/no-loops
-                for (const [key, value] of Object.entries(subTranslations)) {
-
-                    if (mergedTranslations[key]) {
-                        throw new Error(
-                            `[g11n] collision i18n détectée: ${key}`,
-                        );
-                    }
-                    mergedTranslations[key] = value;
-                }
+            if (translations) {
+                Object.assign(mergedTranslations, translations);
             } else {
-                throw new Error(`[@hug/ngx-g11n] No submodule translations found in file: ${sm.translationsPath}/${localeId}.json`);
+                throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
             }
         }
-    }
+    };
+
     return mergedTranslations;
 };
 
@@ -106,7 +87,6 @@ const loadLanguage = async (
     localeId: string,
     locales: Record<string, G11nLocale>,
     options: G11nOptions,
-    submodules: G11nSubmodule[] | undefined,
 ): Promise<void> => {
     // Sync language
     document.documentElement.lang = localeId;
@@ -122,7 +102,7 @@ const loadLanguage = async (
     // Load translations
     if (options.useTranslations) {
         const filename = locale.translationFilename ?? `${localeId}.json`;
-        await loadTranslationFile(`${options.translationsPath!}/${filename}`, localeId, options.debug, submodules);
+        await loadTranslationFiles(options, filename, options.debug);
     }
 };
 
@@ -257,11 +237,11 @@ export const init = (): Provider[] => [
         // eslint-disable-next-line @typescript-eslint/no-deprecated
         provide: APP_INITIALIZER,
         useFactory:
-            (localeId: string, locales: Record<string, G11nLocale>, options: G11nOptions, submodules: G11nSubmodule[]) =>
+            (localeId: string, locales: Record<string, G11nLocale>, options: G11nOptions) =>
                 async (): Promise<void> => {
-                    await loadLanguage(localeId, locales, options, submodules);
+                    await loadLanguage(localeId, locales, options);
                 },
-        deps: [LOCALE_ID, LOCALES, G11N_OPTIONS, G11N_SUBMODULES],
+        deps: [LOCALE_ID, LOCALES, G11N_OPTIONS],
         multi: true,
     },
 ];

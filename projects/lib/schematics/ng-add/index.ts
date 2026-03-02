@@ -25,7 +25,7 @@ interface G11nOptions {
     defaultCurrency?: string;
     useNavigatorLanguage?: boolean;
     loadLocaleExtra?: boolean;
-    translationsPath?: string;
+    translationsPath?: string | string[];
     queryParamName?: string;
 }
 
@@ -76,6 +76,31 @@ const customizeProject = (
         modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage),
     );
 
+    // Add assets if multiple translation file
+    const additionalPaths = options.additionalPaths ? options.additionalPaths.split(',').map(p => p.trim()).filter(Boolean) : [];
+    const additionalPathsOutput: string[] = [];
+    if (additionalPaths.length) {
+        const buildOptionsAssetsPath = ['projects', project.name, 'architect', 'build', 'options', 'assets'];
+        const angularJson = JSON.parse(tree.read('angular.json')!.toString());
+        const assets = angularJson?.projects[project.name]?.architect?.build?.options?.assets ?? [];
+
+        if (Array.isArray(assets)) {
+            Object.entries(additionalPaths).forEach(([_, filePath]) => {
+                const moduleName = (/^.+\/([\w-]+)\/translations$/.exec(filePath))?.[1] ?? '';
+
+                if (moduleName.length) {
+                    const moduleTranslationAssets: Record<string, string> = {
+                        'glob': '**/*',
+                        'input': filePath,
+                        'output': `assets/translations/${moduleName}`,
+                    };
+                    assets.push(moduleTranslationAssets);
+                    additionalPathsOutput.push(`assets/translations/${moduleName}`);
+                }
+            });
+            rules.push(modifyJsonFile('angular.json', buildOptionsAssetsPath, assets));
+        }
+    }
 
     // Provide library
     let configFile: string | null;
@@ -129,6 +154,15 @@ const customizeProject = (
                 opts[key] = value as G11nOptions[keyof G11nOptions];
             }
         });
+
+        // Add translations path
+        if (additionalPaths.length > 0 && additionalPathsOutput.length > 0) {
+            const translationPaths: string[] = [];
+            translationPaths.push(...additionalPathsOutput);
+            translationPaths.push(options.translationsPath ? options.translationsPath : DEFAULT_OPTIONS.translationsPath as string);
+            opts.translationsPath = translationPaths;
+        }
+
         if (Object.keys(opts).length) {
             rules.push(addImportToFile(configFile, 'withOptions', libName));
             provider += `,\n  withOptions(${JSON.stringify(opts, null, 4)

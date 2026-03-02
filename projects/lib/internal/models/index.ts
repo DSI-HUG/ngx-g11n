@@ -5,4 +5,3 @@ export type { G11nFeature } from './g11n-feature.model';
 export type { G11nFile } from './g11n-file.model';
 export type { G11nLocale } from './g11n-locale.model';
 export type { G11nOptions } from './g11n-options.model';
-export type { G11nSubmodule } from './g11n-submodule.model';
