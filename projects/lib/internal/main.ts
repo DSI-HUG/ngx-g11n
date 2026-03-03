@@ -59,8 +59,9 @@ const loadTranslationFiles = async (options: G11nOptions, filename: string, debu
 const loadMergedFiles = async (filePaths: string[]): Promise<Record<string, string>> => {
     const mergedTranslations: Record<string, string> = {};
 
-    // eslint-disable-next-line no-loops/no-loops
-    for (const filePath of filePaths) {
+    await filePaths.reduce<Promise<void>>(async (prev, filePath) => {
+        await prev;
+
         const response = await fetch(filePath);
 
         if (response.status === 200) {
@@ -72,7 +73,8 @@ const loadMergedFiles = async (filePaths: string[]): Promise<Record<string, stri
                 throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
             }
         }
-    };
+
+    }, Promise.resolve());
 
     return mergedTranslations;
 };

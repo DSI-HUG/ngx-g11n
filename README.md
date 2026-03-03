@@ -334,6 +334,11 @@ provideG11n(withInterceptor())
 
 This feature will override the defaults library options.
 
+If additionalPaths are provided:
+
+translationsPath is **always** converted to an array and **always** includes the main path as the last element whether it is default or custom.
+The order is important: the application translation file must always remain last in order to allow key overriding when needed.
+
 ```ts
 // import { withOptions } from '@hug/ngx-g11n/legacy'; /* for ng14 apps */
 import { withOptions } from '@hug/ngx-g11n';
@@ -350,7 +355,7 @@ interface G11nOptions {
     /** @default true */
     useTranslations?: boolean;
     /** @default '/translations' ('/assets/translations' for legacy apps) */
-    translationsPath?: string;
+    translationsPath?: string | []; /* array is for additional translation paths */
     /** @default 'lang' */
     queryParamName?: string;
     /** @default localStorage */
@@ -362,6 +367,16 @@ interface G11nOptions {
 provideG11n(withOptions(options))
 ```
 
+#### # Assets Configuration
+If you provide additional translation paths, the schematic automatically adds them to the build.options.assets section of your angular.json.
+
+```ts
+{
+  "glob": "**/*",
+  "input": "src/app/common/feature-a/translations",
+  "output": "assets/translations/feature-a"
+}
+```
 
 ## Heuristic
 
@@ -378,6 +393,13 @@ And if a language is found using the above criteria:
 2. Check for a match on the `base language` only *(e.g., 'en')*
 3. Check for a match on the `base language` with any `region` *(e.g., 'en-GB')*
 
+## Runtime Behavior
+
+At runtime:
+
+- All translation files are loaded
+- Files are merged
+- The main application translations are always included
 
 ## Debug
 

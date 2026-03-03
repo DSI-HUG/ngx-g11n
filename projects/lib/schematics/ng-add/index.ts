@@ -1,4 +1,5 @@
 import type { Version } from '@angular/core';
+import { normalize } from '@angular-devkit/core';
 import { chain, noop, type Rule } from '@angular-devkit/schematics';
 import {
     addAngularJsonAsset,
@@ -17,7 +18,7 @@ import {
     schematic,
     workspace,
 } from '@hug/ngx-schematics-utilities';
-import { join } from 'node:path';
+import { join } from 'node:path/posix';
 
 import type { NgAddOptions } from './ng-add-options';
 
@@ -65,11 +66,11 @@ const customizeProject = (
     const extractG11nPath = ['projects', project.name, 'architect', 'extract-g11n'];
     if (project.assetsPath) {
         rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outputPath'],
-            join(project.assetsPath, options.translationsPath), () => 0));
+            normalize(join(project.assetsPath, options.translationsPath)), () => 0));
     }
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outFile'], `${options.defaultLanguage}.json`, () => 0));
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'format'], 'json', () => 1));
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'exclusionKeyPrefixes'], ['_'], () => 2));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outFile'], `${options.defaultLanguage}.json`, () => 1));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'format'], 'json', () => 2));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'exclusionKeyPrefixes'], ['_'], () => 3));
 
     rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'builder'], '@hug/ngx-g11n:extract-g11n', () => 0));
 
