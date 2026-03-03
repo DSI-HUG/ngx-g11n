@@ -1,6 +1,7 @@
 import type { Version } from '@angular/core';
 import { chain, noop, type Rule } from '@angular-devkit/schematics';
 import {
+    addAngularJsonAsset,
     addImportToFile,
     addImportToNgModule,
     addPackageJsonDependencies,
@@ -77,29 +78,22 @@ const customizeProject = (
     );
 
     // Add assets if multiple translation file
-    const additionalPaths = options.additionalPaths ? options.additionalPaths.split(',').map(p => p.trim()).filter(Boolean) : [];
+    const additionalPaths: string[] = (typeof options.additionalPaths === 'string') ? options.additionalPaths.split(',').map(p => p.trim()).filter(Boolean) : [];
     const additionalPathsOutput: string[] = [];
     if (additionalPaths.length) {
-        const buildOptionsAssetsPath = ['projects', project.name, 'architect', 'build', 'options', 'assets'];
-        const angularJson = JSON.parse(tree.read('angular.json')!.toString());
-        const assets = angularJson?.projects[project.name]?.architect?.build?.options?.assets ?? [];
+        Object.entries(additionalPaths).forEach(([_, filePath]) => {
+            const moduleName = (/^.+\/([\w-]+)\/translations$/.exec(filePath))?.[1] ?? '';
 
-        if (Array.isArray(assets)) {
-            Object.entries(additionalPaths).forEach(([_, filePath]) => {
-                const moduleName = (/^.+\/([\w-]+)\/translations$/.exec(filePath))?.[1] ?? '';
-
-                if (moduleName.length) {
-                    const moduleTranslationAssets: Record<string, string> = {
-                        'glob': '**/*',
-                        'input': filePath,
-                        'output': `assets/translations/${moduleName}`,
-                    };
-                    assets.push(moduleTranslationAssets);
-                    additionalPathsOutput.push(`assets/translations/${moduleName}`);
-                }
-            });
-            rules.push(modifyJsonFile('angular.json', buildOptionsAssetsPath, assets));
-        }
+            if (moduleName.length) {
+                const moduleTranslationAssets: Record<string, string> = {
+                    'glob': '**/*',
+                    'input': filePath,
+                    'output': `assets/translations/${moduleName}`,
+                };
+                rules.push(addAngularJsonAsset(moduleTranslationAssets, project.name));
+                additionalPathsOutput.push(`assets/translations/${moduleName}`);
+            }
+        });
     }
 
     // Provide library
@@ -156,7 +150,7 @@ const customizeProject = (
         });
 
         // Add translations path
-        if (additionalPaths.length > 0 && additionalPathsOutput.length > 0) {
+        if (additionalPaths.length && additionalPathsOutput.length) {
             const translationPaths: string[] = [];
             translationPaths.push(...additionalPathsOutput);
             translationPaths.push(options.translationsPath ? options.translationsPath : DEFAULT_OPTIONS.translationsPath as string);
