@@ -53,6 +53,7 @@ export class AppRoutingModule { }
             withInterceptor(),
             withOptions({
                 debug: G11nDebug.NO_DEBUG,
+                translationsPath: 'public/translations',
             }),
         ),
     ],

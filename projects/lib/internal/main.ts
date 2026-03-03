@@ -43,8 +43,6 @@ const loadTranslationFiles = async (options: G11nOptions, filename: string, debu
     const filePaths = paths.map(path => `${path}/${filename}`);
     const translations = await loadMergedFiles(filePaths);
 
-    loadTranslations(translations);
-
     if (debugMode === G11nDebug.SHOW_KEYS) {
         Object.entries(translations).forEach(([key, value]) => {
             translations[key] = `${value} (@${key})`;
@@ -54,6 +52,8 @@ const loadTranslationFiles = async (options: G11nOptions, filename: string, debu
             translations[key] = '-';
         });
     }
+
+    loadTranslations(translations);
 };
 
 const loadMergedFiles = async (filePaths: string[]): Promise<Record<string, string>> => {
