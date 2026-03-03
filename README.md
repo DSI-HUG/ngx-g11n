@@ -355,7 +355,7 @@ interface G11nOptions {
     /** @default true */
     useTranslations?: boolean;
     /** @default '/translations' ('/assets/translations' for legacy apps) */
-    translationsPath?: string | []; /* array is for additional translation paths */
+    translationsPath?: string | string[]; /* array is for multiple translation paths */
     /** @default 'lang' */
     queryParamName?: string;
     /** @default localStorage */
@@ -398,8 +398,7 @@ And if a language is found using the above criteria:
 At runtime:
 
 - All translation files are loaded
-- Files are merged
-- The main application translations are always included
+- Files are merged in order
 
 ## Debug
 
