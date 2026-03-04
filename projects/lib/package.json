@@ -44,10 +44,10 @@
         "@angular/common": ">= 14",
         "@angular/core": ">= 14",
         "@angular/localize": ">= 14",
-        "rxjs": ">= 7",
         "@angular/material": ">= 14",
         "@angular/material-date-fns-adapter": ">= 14",
-        "date-fns": ">= 2.3"
+        "date-fns": ">= 2.3",
+        "rxjs": ">= 7"
     },
     "peerDependenciesMeta": {
         "@angular/localize": {
