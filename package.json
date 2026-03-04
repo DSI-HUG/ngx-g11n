@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@angular/build": "^21.0.4",
-    "@angular/cli": "~21.0.4",
+    "@angular/cli": "~21.2.0",
     "@angular/compiler": "^21.0.6",
     "@angular/compiler-cli": "^21.0.6",
     "@colors/colors": "^1.6.0",
