@@ -5,6 +5,7 @@ export interface NgAddOptions {
     useNavigatorLanguage: boolean;
     loadLocaleExtra: boolean;
     translationsPath: string;
+    additionalPaths: string;
     queryParamName: string;
     material: boolean;
     interceptor: boolean;

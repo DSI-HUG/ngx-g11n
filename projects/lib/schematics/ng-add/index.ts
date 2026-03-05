@@ -1,6 +1,7 @@
 import type { Version } from '@angular/core';
 import { chain, noop, type Rule, type SchematicContext, type Tree } from '@angular-devkit/schematics';
 import {
+    addAngularJsonAsset,
     addImportToFile,
     addImportToNgModule,
     addPackageJsonDependencies,
@@ -12,6 +13,7 @@ import {
     logError,
     modifyJsonFile,
     packageInstallTask,
+    removeFromJsonFile,
     replaceInFile,
     runAtEnd,
     schematic,
@@ -27,7 +29,7 @@ interface G11nOptions {
     defaultCurrency?: string;
     useNavigatorLanguage?: boolean;
     loadLocaleExtra?: boolean;
-    translationsPath?: string;
+    translationsPath?: string | string[];
     queryParamName?: string;
 }
 
@@ -40,11 +42,7 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     queryParamName: 'lang',
 };
 
-const customizeProject = (
-    { project, tree }: ChainableApplicationContext,
-    options: NgAddOptions,
-    ngVersion: Version,
-): Rule => {
+const customizeProject = ({ project, tree }: ChainableApplicationContext, options: NgAddOptions, ngVersion: Version): Rule => {
     const rules: Rule[] = [];
 
     // tsconfig.json
@@ -52,22 +50,54 @@ const customizeProject = (
         rules.push(modifyJsonFile('tsconfig.json', ['angularCompilerOptions', 'skipLibCheck'], true));
     }
 
+    // package.json
+    // Remove if exists i18n script
+    rules.push(removeFromJsonFile('package.json', ['scripts', 'i18n']));
+    rules.push(modifyJsonFile('package.json', ['scripts', 'g11n'], `ng run ${project.name}:extract-g11n`));
+
     // angular.json
-    const extractOptionsPath = ['projects', project.name, 'architect', 'extract-i18n', 'options'];
+    // Remove if exists extract-i18n builder
+    const extractI18nBuilderPath = ['projects', project.name, 'architect', 'extract-i18n'];
+    rules.push(removeFromJsonFile('angular.json', [...extractI18nBuilderPath]));
+
+    // Add extract-g11n builder
+    const extractG11nPath = ['projects', project.name, 'architect', 'extract-g11n'];
     if (project.assetsPath) {
-        rules.push(
-            modifyJsonFile(
-                'angular.json',
-                [...extractOptionsPath, 'outputPath'],
-                join(project.assetsPath, options.translationsPath),
-            ),
+        rules.push(modifyJsonFile(
+            'angular.json',
+            [...extractG11nPath, 'options', 'outputPath'],
+            join(project.assetsPath, options.translationsPath),
+            () => 0),
         );
     }
-    rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'outFile'], `${options.defaultLanguage}.json`));
-    rules.push(modifyJsonFile('angular.json', [...extractOptionsPath, 'format'], 'json'));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outFile'], `${options.defaultLanguage}.json`, () => 1));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'format'], 'json', () => 2));
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'exclusionKeyPrefixes'], ['_'], () => 3));
+
+    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'builder'], '@hug/ngx-g11n:extract-g11n', () => 0));
+
     rules.push(
         modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage),
     );
+
+    // Add assets if multiple translation file
+    const additionalPaths: string[] = (typeof options.additionalPaths === 'string') ? options.additionalPaths.split(',').map(p => p.trim()).filter(Boolean) : [];
+    const additionalPathsOutput: string[] = [];
+    if (additionalPaths.length) {
+        Object.entries(additionalPaths).forEach(([_, filePath]) => {
+            const moduleName = (/^.+\/([\w-]+)\/translations$/.exec(filePath))?.[1] ?? '';
+
+            if (moduleName.length) {
+                const moduleTranslationAssets: Record<string, string> = {
+                    'glob': '**/*',
+                    'input': filePath,
+                    'output': `assets/translations/${moduleName}`,
+                };
+                rules.push(addAngularJsonAsset(moduleTranslationAssets, project.name));
+                additionalPathsOutput.push(`assets/translations/${moduleName}`);
+            }
+        });
+    }
 
     // Provide library
     let configFile: string | null;
@@ -120,6 +150,15 @@ const customizeProject = (
                 opts[key] = value as G11nOptions[keyof G11nOptions];
             }
         });
+
+        // Add translations path
+        if (additionalPaths.length && additionalPathsOutput.length) {
+            const translationPaths: string[] = [];
+            translationPaths.push(...additionalPathsOutput);
+            translationPaths.push(options.translationsPath ? options.translationsPath : DEFAULT_OPTIONS.translationsPath as string);
+            opts.translationsPath = translationPaths;
+        }
+
         if (Object.keys(opts).length) {
             rules.push(addImportToFile(configFile, 'withOptions', libName));
             provider += `,\n  withOptions(${JSON.stringify(opts, null, 4)
@@ -194,37 +233,28 @@ const customizeProject = (
 export default (options: NgAddOptions): Rule =>
     async (): Promise<Rule> => {
         const ngVersion = await getAngularVersion();
+        return schematic('@hug/ngx-g11n', [
+            workspace()
+                .spawn('ng', ['add', '@angular/localize', '--skip-confirmation'])
+                .rule(() =>
+                    options.material ? chain([
+                        addPackageJsonDependencies([{
+                            name: '@angular/material-date-fns-adapter',
+                            version: `^${ngVersion.major}.0.0`,
+                        }]),
+                        packageInstallTask(),
+                    ]) : noop(),
+                )
+                .toRule(),
 
-        return schematic(
-            '@hug/ngx-g11n',
-            [
-                workspace()
-                    .spawn('ng', ['add', '@angular/localize', '--skip-confirmation'])
-                    .rule(() =>
-                        options.material
-                            ? chain([
-                                addPackageJsonDependencies([
-                                    {
-                                        name: '@angular/material-date-fns-adapter',
-                                        version: `^${ngVersion.major}.0.0`,
-                                    },
-                                ]),
-                                packageInstallTask(),
-                            ])
-                            : noop(),
-                    )
-                    .toRule(),
-
-                application(options.project)
-                    .rule(({ project }) => {
-                        if (!project.assetsPath) {
-                            return logError('Deploying assets failed: no assets path found');
-                        }
-                        return deployFiles(options, './files', join(project.assetsPath, options.translationsPath));
-                    })
-                    .rule(context => customizeProject(context, options, ngVersion))
-                    .toRule(),
-            ],
-            options,
-        );
+            application(options.project)
+                .rule(({ project }) => {
+                    if (!project.assetsPath) {
+                        return logError('Deploying assets failed: no assets path found');
+                    }
+                    return deployFiles(options, './files', join(project.assetsPath, options.translationsPath));
+                })
+                .rule(context => customizeProject(context, options, ngVersion))
+                .toRule(),
+        ], options);
     };

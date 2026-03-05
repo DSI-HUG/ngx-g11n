@@ -13,6 +13,9 @@
             "root": "projects/demo-app",
             "sourceRoot": "projects/demo-app/src",
             "prefix": "app",
+            "i18n": {
+                "sourceLocale": "fr-CH"
+            },
             "architect": {
                 "build": {
                     "builder": "@angular/build:application",
@@ -69,6 +72,17 @@
                     },
                     "defaultConfiguration": "production"
                 },
+                "extract-g11n": {
+                    "options": {
+                        "outputPath": "projects/demo-app/public/translations",
+                        "outFile": "fr-CH.json",
+                        "format": "json",
+                        "exclusionKeyPrefixes": [
+                            "_"
+                        ]
+                    },
+                    "builder": "@hug/ngx-g11n:extract-g11n"
+                },
                 "serve": {
                     "builder": "@angular/build:dev-server",
                     "configurations": {
@@ -82,14 +96,6 @@
                         }
                     },
                     "defaultConfiguration": "development"
-                },
-                "extract-i18n": {
-                    "builder": "@angular/build:extract-i18n",
-                    "options": {
-                        "outputPath": "projects/demo-app/public/i18n",
-                        "outFile": "_extract.json",
-                        "format": "json"
-                    }
                 },
                 "lint": {
                     "builder": "@angular-eslint/builder:lint",
@@ -192,5 +198,8 @@
         "@schematics/angular:resolver": {
             "typeSeparator": "."
         }
+    },
+    "cli": {
+        "analytics": false
     }
 }

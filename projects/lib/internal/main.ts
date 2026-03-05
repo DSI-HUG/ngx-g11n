@@ -37,26 +37,46 @@ export const setLanguage = (value: string): void => {
 
 // --- HELPER(s) ---
 
-const loadTranslationFile = async (filePath: string, debug: G11nDebug = G11nDebug.NO_DEBUG): Promise<void> => {
+const loadTranslationFiles = async (options: G11nOptions, filename: string, debug: G11nDebug = G11nDebug.NO_DEBUG): Promise<void> => {
     const debugMode = FORCE_DEBUG !== G11nDebug.NO_DEBUG ? FORCE_DEBUG : debug;
-    const response = await fetch(filePath);
-    if (response.status === 200) {
-        const { translations } = (await response.json()) as G11nFile | Record<string, undefined>;
-        if (translations) {
-            if (debugMode === G11nDebug.SHOW_KEYS) {
-                Object.entries(translations).forEach(([key, value]) => {
-                    translations[key] = `${value} (@${key})`;
-                });
-            } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
-                Object.keys(translations).forEach(key => {
-                    translations[key] = '-';
-                });
-            }
-            loadTranslations(translations);
-        } else {
-            throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
-        }
+    const paths = Array.isArray(options.translationsPath) ? options.translationsPath : [options.translationsPath!];
+    const filePaths = paths.map(path => `${path}/${filename}`);
+    const translations = await loadMergedFiles(filePaths);
+
+    if (debugMode === G11nDebug.SHOW_KEYS) {
+        Object.entries(translations).forEach(([key, value]) => {
+            translations[key] = `${value} (@${key})`;
+        });
+    } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
+        Object.keys(translations).forEach(key => {
+            translations[key] = '-';
+        });
     }
+
+    loadTranslations(translations);
+};
+
+const loadMergedFiles = async (filePaths: string[]): Promise<Record<string, string>> => {
+    const mergedTranslations: Record<string, string> = {};
+
+    await filePaths.reduce<Promise<void>>(async (prev, filePath) => {
+        await prev;
+
+        const response = await fetch(filePath);
+
+        if (response.status === 200) {
+            const { translations } = (await response.json()) as G11nFile | Record<string, undefined>;
+
+            if (translations) {
+                Object.assign(mergedTranslations, translations);
+            } else {
+                throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
+            }
+        }
+
+    }, Promise.resolve());
+
+    return mergedTranslations;
 };
 
 const refreshUrl = (localeId: string): void => {
@@ -84,7 +104,7 @@ const loadLanguage = async (
     // Load translations
     if (options.useTranslations) {
         const filename = locale.translationFilename ?? `${localeId}.json`;
-        await loadTranslationFile(`${options.translationsPath!}/${filename}`, options.debug);
+        await loadTranslationFiles(options, filename, options.debug);
     }
 };
 

@@ -41,6 +41,8 @@
         "release": "npm publish ../../dist/ngx-g11n --access=public --workspaces=false"
     },
     "peerDependencies": {
+        "@angular-devkit/architect": "^0.1900.0",
+        "@angular-devkit/core": ">=14",
         "@angular/common": ">= 14",
         "@angular/core": ">= 14",
         "@angular/localize": ">= 14",
@@ -70,5 +72,6 @@
     "schematics": "./schematics/collection.json",
     "ng-add": {
         "save": "dependencies"
-    }
+    },
+    "builders": "./builders/builders.json"
 }

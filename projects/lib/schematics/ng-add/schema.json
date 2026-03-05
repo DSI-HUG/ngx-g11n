@@ -36,10 +36,16 @@
             "default": false
         },
         "translationsPath": {
-            "x-prompt": "Translations path",
-            "description": "Translations path",
+            "x-prompt": "Main translations path",
+            "description": "Main translations path",
             "type": "string",
             "default": "/translations"
+        },
+        "additionalPaths": {
+            "x-prompt": "Additionnal translations path (if multiple paths, separate them with a comma)",
+            "description": "Additionnal translations path (if multiple paths, separate them with a comma)",
+            "type": "string",
+            "default": ""
         },
         "queryParamName": {
             "x-prompt": "Query param name",

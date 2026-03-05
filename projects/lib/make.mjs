@@ -16,9 +16,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const NG_PROJECT_LIBRARY_NAME = 'lib';
 const LIBRARY_SRC = '.';
 const SCHEMATICS_SRC = 'schematics';
+const BUILDERS_SRC = 'builders';
+const EXTRACT_G11N_BUILDER_SRC = 'extract-g11n';
 const LIBRARY_TYPE = existsSync(pathResolve(__dirname, 'ng-package.json')) ? 'ng' : 'ts'; // 'ng' or 'ts'
 const LIBRARY_SRC_PATH = pathResolve(__dirname, LIBRARY_SRC);
 const SCHEMATICS_SRC_PATH = pathResolve(__dirname, SCHEMATICS_SRC);
+const BUILDERS_SRC_PATH = pathResolve(__dirname, BUILDERS_SRC);
+const EXTRACT_G11N_BUILDER_SRC_PATH = pathResolve(BUILDERS_SRC_PATH, EXTRACT_G11N_BUILDER_SRC);
 const WORKSPACE_PATH = pathResolve(__dirname, '..', '..');
 const DIST_PATH = pathResolve(WORKSPACE_PATH, 'dist/ngx-g11n');
 
@@ -37,6 +41,13 @@ const copySchematicsAssets = async () => {
     await cpy(`${SCHEMATICS_SRC_PATH}/*/*.json`, `${DIST_PATH}/schematics`);
     await cpy(`${SCHEMATICS_SRC_PATH}/*/schema.json`, `${DIST_PATH}/schematics`);
     await cpy(`${SCHEMATICS_SRC_PATH}/collection.json`, `${DIST_PATH}/schematics`, { flat: true });
+};
+const copyBuildersAssets = async () => {
+    log('> Copying builders assets..');
+    await cpy(`${BUILDERS_SRC_PATH}/builders.json`, `${DIST_PATH}/builders`, { flat: true });
+};
+const copyExtractG11nBuilderAssets = async () => {
+    await cpy(`${EXTRACT_G11N_BUILDER_SRC_PATH}/schema.json`, `${DIST_PATH}/builders/extract-g11n`, { flat: true });
 };
 
 let chokidarWatcher;
@@ -119,6 +130,24 @@ const buildSchematics = async (exitOnError = true) => {
         log('> Copying schematics assets..');
         await copySchematicsAssets();
     }
+};
+
+const buildExtractG11nBuilder = async (exitOnError = true) => {
+    if (existsSync(EXTRACT_G11N_BUILDER_SRC_PATH)) {
+        if (existsSync('tsconfig.extract-g11n.json')) {
+            log('> Building extract-g11n..');
+            spawnCmd('tsc', ['-p', './tsconfig.extract-g11n.json'], true, exitOnError);
+        }
+        log('> Copying extract-g11n assets..');
+        await copyExtractG11nBuilderAssets();
+    }
+};
+
+const buildBuilders = async (exitOnError = true) => {
+    if (existsSync(BUILDERS_SRC_PATH)) {
+        await buildExtractG11nBuilder(exitOnError);
+    }
+    await copyBuildersAssets();
 };
 
 const buildLib = async (exitOnError = true) => {
@@ -219,6 +248,7 @@ const watch = async () => {
                 await cleanDir(DIST_PATH);
                 await buildLib();
                 await buildSchematics();
+                await buildBuilders();
                 log(`> ${styleText('green', 'Done!')}\n`);
                 break;
             case 'build-global':
@@ -226,6 +256,7 @@ const watch = async () => {
                 await cleanDir(DIST_PATH);
                 await buildLib();
                 await buildSchematics();
+                await buildBuilders();
                 await packDistAndInstallGlobally();
                 log(`> ${styleText('green', 'Done!')}\n`);
                 break;
