@@ -2,16 +2,14 @@
  * Usage: $ node ./make.mjs <watch|lint|test-lib|test-schematics|test-ci|build|build-global>
  */
 
-import colors from '@colors/colors/safe.js';
 import { watch as chokidarWatch } from 'chokidar';
 import cpy from 'cpy';
 import crossSpawn from 'cross-spawn';
-import fxExtra from 'fs-extra';
+import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, resolve as pathResolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { styleText } from 'node:util';
 
-const { existsSync, mkdirSync, readFileSync, rmSync } = fxExtra;
-const { green, magenta } = colors;
 const { sync: spawnSync } = crossSpawn;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -54,11 +52,11 @@ const copyExtractG11nBuilderAssets = async () => {
 
 let chokidarWatcher;
 
-const log = str => console.log(magenta(str));
+const log = str => console.log(styleText('magenta', str));
 const logHeader = str => {
-    console.log(green(`\n${'-'.repeat(78)}`));
-    console.log(green(str));
-    console.log(green(`${'-'.repeat(78)}`));
+    console.log(styleText('green', `\n${'-'.repeat(78)}`));
+    console.log(styleText('green', str));
+    console.log(styleText('green', `${'-'.repeat(78)}`));
 };
 
 const spawnCmd = (cmd, args, verbose = true, exitOnError = true) => {
@@ -215,7 +213,7 @@ const watch = async () => {
         await cleanDir(DIST_PATH);
         await buildLib(false);
         await buildSchematics(false);
-        log(`> ${green('Done!')}`);
+        log(`> ${styleText('green', 'Done!')}`);
     };
 
     chokidarWatcher = chokidarWatch([LIBRARY_SRC_PATH, SCHEMATICS_SRC_PATH], { ignoreInitial: true, usePolling: true });
@@ -251,7 +249,7 @@ const watch = async () => {
                 await buildLib();
                 await buildSchematics();
                 await buildBuilders();
-                log(`> ${green('Done!')}\n`);
+                log(`> ${styleText('green', 'Done!')}\n`);
                 break;
             case 'build-global':
                 log('> Cleaning..');
@@ -260,7 +258,7 @@ const watch = async () => {
                 await buildSchematics();
                 await buildBuilders();
                 await packDistAndInstallGlobally();
-                log(`> ${green('Done!')}\n`);
+                log(`> ${styleText('green', 'Done!')}\n`);
                 break;
             default:
                 break;

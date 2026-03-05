@@ -1,6 +1,5 @@
 import type { Version } from '@angular/core';
-import { normalize } from '@angular-devkit/core';
-import { chain, noop, type Rule } from '@angular-devkit/schematics';
+import { chain, noop, type Rule, type SchematicContext, type Tree } from '@angular-devkit/schematics';
 import {
     addAngularJsonAsset,
     addImportToFile,
@@ -15,10 +14,13 @@ import {
     modifyJsonFile,
     packageInstallTask,
     removeFromJsonFile,
+    replaceInFile,
+    runAtEnd,
     schematic,
     workspace,
 } from '@hug/ngx-schematics-utilities';
-import { join } from 'node:path/posix';
+import { join } from 'node:path';
+import { styleText } from 'node:util';
 
 import type { NgAddOptions } from './ng-add-options';
 
@@ -40,11 +42,7 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     queryParamName: 'lang',
 };
 
-const customizeProject = (
-    { project, tree }: ChainableApplicationContext,
-    options: NgAddOptions,
-    ngVersion: Version,
-): Rule => {
+const customizeProject = ({ project, tree }: ChainableApplicationContext, options: NgAddOptions, ngVersion: Version): Rule => {
     const rules: Rule[] = [];
 
     // tsconfig.json
@@ -65,8 +63,12 @@ const customizeProject = (
     // Add extract-g11n builder
     const extractG11nPath = ['projects', project.name, 'architect', 'extract-g11n'];
     if (project.assetsPath) {
-        rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outputPath'],
-            normalize(join(project.assetsPath, options.translationsPath)), () => 0));
+        rules.push(modifyJsonFile(
+            'angular.json',
+            [...extractG11nPath, 'options', 'outputPath'],
+            join(project.assetsPath, options.translationsPath),
+            () => 0),
+        );
     }
     rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outFile'], `${options.defaultLanguage}.json`, () => 1));
     rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'format'], 'json', () => 2));
@@ -114,31 +116,30 @@ const customizeProject = (
         // ---- locales
         if (options.defaultLocales && options.material) {
             rules.push(addImportToFile(configFile, 'withDefaultLocales', '@hug/ngx-g11n/locales'));
-            provider += '\n  withDefaultLocales()';
+            provider += '\nwithDefaultLocales()';
         } else {
             rules.push(addImportToFile(configFile, 'withLocales', libName));
 
             const getLocale = (locale: string): string => {
                 let str = `'${locale}': {`;
-                str += `\n      base: () => import('@angular/common/locales/${locale}')`;
+                str += `\n    base: () => import('@angular/common/locales/${locale}')`;
                 if (options.loadLocaleExtra) {
-                    str += `,\n      extra: () => import('@angular/common/locales/extra/${locale}')`;
+                    str += `,\n    extra: () => import('@angular/common/locales/extra/${locale}')`;
                 }
                 if (options.material) {
-                    str += `,\n      datefns: () => import('date-fns/locale/${locale}')`;
+                    str += `,\n    datefns: () => import('date-fns/locale/${locale}')`;
                 }
-                str += '\n    }';
+                str += '\n  }';
                 return str;
             };
-
-            provider += '\n  withLocales({';
+            provider += '\nwithLocales({';
             if (options.defaultLocales) {
-                provider += `\n    ${getLocale('fr-CH')}`;
-                provider += `,\n    ${getLocale('de-CH')}`;
+                provider += `\n  ${getLocale('fr-CH')}`;
+                provider += `,\n  ${getLocale('de-CH')}`;
             } else {
-                provider += `\n    ${getLocale(options.defaultLanguage)}`;
+                provider += `\n  ${getLocale(options.defaultLanguage)}`;
             }
-            provider += '\n  })';
+            provider += '\n})';
         }
 
         // ---- options
@@ -168,18 +169,56 @@ const customizeProject = (
         // ---- material
         if (options.material) {
             rules.push(addImportToFile(configFile, 'withDateFnsMaterial', '@hug/ngx-g11n/material'));
-            provider += ',\n  withDateFnsMaterial()';
+            provider += ',\nwithDateFnsMaterial()';
         }
 
         // ---- interceptor
         if (options.interceptor) {
             rules.push(addImportToFile(configFile, 'withInterceptor', libName));
-            provider += ',\n  withInterceptor()';
+            provider += ',\nwithInterceptor()';
         }
 
         provider += '\n)';
+        provider = provider.split('\n').map((line, i, arr) => `${i === 0 || i === arr.length - 1 ? '' : '  '}${line}`).join('\n');
         if (project.isStandalone) {
-            rules.push(addProviderToBootstrapApplication(project.mainFilePath, provider, libName));
+            rules.push(async (ruleTree: Tree, ruleContext: SchematicContext): Promise<Rule> => {
+                try {
+                    await addProviderToBootstrapApplication(project.mainFilePath, provider, libName)(ruleTree, ruleContext);
+                    return noop();
+                } catch (err: unknown) {
+                    const errorMessage = (err instanceof Error) ? err.message : 'An unknown error occurred';
+                    if (errorMessage.includes('Application config is not an object literal')) {
+                        const fileContent = ruleTree.read(configFile)?.toString('utf-8') ?? '';
+                        const patternToReplace = /providers: \[/sm;
+                        if (!(patternToReplace.exec(fileContent))) {
+                            const conflictContent =
+                                '\n' +
+                                '<<<<<<< HEAD\n' +
+                                '=======\n' +
+                                '\n' +
+                                '// This code was auto-generated by \'@hug/ngx-g11n\' schematic.\n' +
+                                '// Unfortunately the schematic was not able to merged it with your current code.\n' +
+                                '// Please resolve it manually.\n' +
+                                '\n' +
+                                'export const appConfig: ApplicationConfig = {\n' +
+                                '  providers: [\n' +
+                                `    ${provider.split('\n').join('\n    ')}\n` +
+                                '  ]\n' +
+                                '};\n' +
+                                '\n' +
+                                '>>>>>>>\n';
+                            return chain([
+                                replaceInFile(configFile, /$/g, conflictContent),
+                                runAtEnd(logError(`There were some conflicts during the installation, please have a look at ${styleText('bold', `'${configFile}'`)} file and resolve them.`)),
+                            ]);
+                        } else {
+                            return replaceInFile(configFile, patternToReplace, `providers: [\n    ${provider.split('\n').join('\n    ')},`);
+                        }
+                    } else {
+                        return logError(`${errorMessage} (skipping)`);
+                    }
+                }
+            });
         } else {
             rules.push(addImportToNgModule(configFile, provider, libName));
         }
@@ -194,37 +233,28 @@ const customizeProject = (
 export default (options: NgAddOptions): Rule =>
     async (): Promise<Rule> => {
         const ngVersion = await getAngularVersion();
+        return schematic('@hug/ngx-g11n', [
+            workspace()
+                .spawn('ng', ['add', '@angular/localize', '--skip-confirmation'])
+                .rule(() =>
+                    options.material ? chain([
+                        addPackageJsonDependencies([{
+                            name: '@angular/material-date-fns-adapter',
+                            version: `^${ngVersion.major}.0.0`,
+                        }]),
+                        packageInstallTask(),
+                    ]) : noop(),
+                )
+                .toRule(),
 
-        return schematic(
-            '@hug/ngx-g11n',
-            [
-                workspace()
-                    .spawn('ng', ['add', '@angular/localize', '--skip-confirmation'])
-                    .rule(() =>
-                        options.material
-                            ? chain([
-                                addPackageJsonDependencies([
-                                    {
-                                        name: '@angular/material-date-fns-adapter',
-                                        version: `^${ngVersion.major}.0.0`,
-                                    },
-                                ]),
-                                packageInstallTask(),
-                            ])
-                            : noop(),
-                    )
-                    .toRule(),
-
-                application(options.project)
-                    .rule(({ project }) => {
-                        if (!project.assetsPath) {
-                            return logError('Deploying assets failed: no assets path found');
-                        }
-                        return deployFiles(options, './files', join(project.assetsPath, options.translationsPath));
-                    })
-                    .rule(context => customizeProject(context, options, ngVersion))
-                    .toRule(),
-            ],
-            options,
-        );
+            application(options.project)
+                .rule(({ project }) => {
+                    if (!project.assetsPath) {
+                        return logError('Deploying assets failed: no assets path found');
+                    }
+                    return deployFiles(options, './files', join(project.assetsPath, options.translationsPath));
+                })
+                .rule(context => customizeProject(context, options, ngVersion))
+                .toRule(),
+        ], options);
     };
