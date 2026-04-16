@@ -10,9 +10,9 @@ import type { Observable } from 'rxjs';
 export const withInterceptor = (): G11nFeature<EnvironmentProviders> => ({
     providers: [
         provideHttpClient(withInterceptors([
-            (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
+            (req: HttpRequest<unknown>, next$: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
                 const headers = req.headers.set('Accept-Language', inject(LOCALE_ID));
-                return next(req.clone({ headers }));
+                return next$(req.clone({ headers }));
             },
         ])),
     ],
