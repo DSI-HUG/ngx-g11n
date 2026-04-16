@@ -51,13 +51,15 @@ ng add @hug/ngx-g11n
 > 2.  **? Default currency**: *the default currency used by your application*
 > 3.  **? Use navigator language**: *whether to use the navigator language*
 > 4.  **? Use Angular locale extra**: *whether to also register Angular locale extra*
-> 5.  **? Translations path**: *the path to your translation files*
-> 6.  **? Query param name**: *the name of the query parameter used to define the language*
-> 7.  **? Auto-inject locale in request headers**: *whether to inject the language in every requests header*
-> 8.  **? Add support for Angular Material**: *whether to also configure things for Angular Material*
-> 9.  **? Add locales [fr-CH, de-CH] by defaults**: *whether to add fr-CH and de-CH by default*
+> 5.  **? Root translations path**: *the path to the root translation folder*
+> 6.  **? Translation scopes**: *the scopes to load translations from (comma-separated)*
+> 7.  **? Query param name**: *the name of the query parameter used to define the language*
+> 8.  **? Auto-inject locale in request headers**: *whether to inject the language in every requests header*
+> 9.  **? Add support for Angular Material**: *whether to also configure things for Angular Material*
+> 10.  **? Add locales [fr-CH, de-CH] by defaults**: *whether to add fr-CH and de-CH by default*
+> 11.  **? Use enhanced builder**: *whether to use the library's enhanced builder*
 >
-> And based on your answers, it will also potentialy perform the following actions:
+> And based on your answers, it will also potentially perform the following actions:
 >
 > -   Run `ng add @angular/localize` schematic
 > -   Install `@angular/material-date-fns-adapter` as a dev dependency
@@ -79,7 +81,7 @@ ng add @hug/ngx-g11n
 >           "extract-i18n": {
 >             "builder": "@angular/build:extract-i18n",
 >             "options": {
->               "outputPath": "projects/demo-app/public/i18n",
+>               "outputPath": "public/translations",
 >               "outFile": "fr-CH.json",
 >               "format": "json"
 >             }
@@ -264,8 +266,10 @@ interface G11nOptions {
     loadLocaleExtra?: boolean;
     /** @default true */
     useTranslations?: boolean;
-    /** @default '/translations' ('/assets/translations' for legacy apps) */
-    translationsPath?: string;
+    /** @default '/translations' (or '/assets/translations' for legacy apps) */
+    rootTranslationsPath?: string;
+    /** @default [] */
+    translationScopes?: string[];
     /** @default 'lang' */
     queryParamName?: string;
     /** @default localStorage */
@@ -276,6 +280,52 @@ interface G11nOptions {
 
 provideG11n(withOptions(options))
 ```
+
+
+## Enhanced builder
+
+This library also provides a custom **extract-i18n** builder that extends Angular's default extraction workflow with additional features.
+
+It acts as a post-processing layer on top of Angular’s extraction.
+
+### Additional features
+
+#### # ignoreKeyPatterns
+
+After Angular completes the extraction, the builder scans all keys in the generated JSON file and removes those matching the provided regex patterns.
+
+In projects with **embedded translation sources** (e.g. shared libraries or third-party modules), extraction often includes unwanted keys.
+
+This option ensures your final translation files only contain **application-relevant keys**, keeping them clean and maintainable.
+
+#### # backupIgnoredTranslations
+
+When used together with ignoreKeyPatterns, all filtered-out keys are written to a secondary file instead of being discarded.
+
+### Usage
+
+Configure the builder in your `angular.json` file:
+
+```json
+"projects": {
+  "my-app": {
+    "architect": {
+      "extract-i18n": {
+        "builder": "@hug/ngx-g11n:extract-i18n",
+        "options": {
+          "outputPath": "public/translations",
+          "outFile": "fr-CH.json",
+          "format": "json",
+          "ignoreKeyPatterns": ["(keyA|keyB)_.*", "keyC_.*"],
+          "backupIgnoredTranslations": true
+        }
+      }
+    }
+  }
+}
+```
+
+Then simply run `ng extract-i18n`.
 
 
 ## Heuristic

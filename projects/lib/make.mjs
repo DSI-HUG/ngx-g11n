@@ -15,9 +15,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const NG_PROJECT_LIBRARY_NAME = 'lib';
 const LIBRARY_SRC = '.';
+const BUILDERS_SRC = 'builders';
 const SCHEMATICS_SRC = 'schematics';
 const LIBRARY_TYPE = existsSync(pathResolve(__dirname, 'ng-package.json')) ? 'ng' : 'ts'; // 'ng' or 'ts'
 const LIBRARY_SRC_PATH = pathResolve(__dirname, LIBRARY_SRC);
+const BUILDERS_SRC_PATH = pathResolve(__dirname, BUILDERS_SRC);
 const SCHEMATICS_SRC_PATH = pathResolve(__dirname, SCHEMATICS_SRC);
 const WORKSPACE_PATH = pathResolve(__dirname, '..', '..');
 const DIST_PATH = pathResolve(WORKSPACE_PATH, 'dist/ngx-g11n');
@@ -32,11 +34,17 @@ const copyAssets = async () => {
         await cpy(pathResolve(__dirname, 'scripts'), `${DIST_PATH}/scripts`, { flat: true });
     }
 };
+const copyBuildersAssets = async () => {
+    await cpy(`${BUILDERS_SRC_PATH}/*/schema.json`, `${DIST_PATH}/builders`);
+    await cpy(`${BUILDERS_SRC_PATH}/builders.json`, `${DIST_PATH}/builders`, { flat: true });
+    await cpy(`${BUILDERS_SRC_PATH}/package.json`, `${DIST_PATH}/builders`, { flat: true });
+};
 const copySchematicsAssets = async () => {
     await cpy(`${SCHEMATICS_SRC_PATH}/*/files/**/*`, `${DIST_PATH}/schematics`, { dot: true });
     await cpy(`${SCHEMATICS_SRC_PATH}/*/*.json`, `${DIST_PATH}/schematics`);
     await cpy(`${SCHEMATICS_SRC_PATH}/*/schema.json`, `${DIST_PATH}/schematics`);
     await cpy(`${SCHEMATICS_SRC_PATH}/collection.json`, `${DIST_PATH}/schematics`, { flat: true });
+    await cpy(`${SCHEMATICS_SRC_PATH}/package.json`, `${DIST_PATH}/schematics`, { flat: true });
 };
 
 let chokidarWatcher;
@@ -118,6 +126,17 @@ const buildSchematics = async (exitOnError = true) => {
         }
         log('> Copying schematics assets..');
         await copySchematicsAssets();
+    }
+};
+
+const buildBuilders = async (exitOnError = true) => {
+    if (existsSync(BUILDERS_SRC_PATH)) {
+        if (existsSync('tsconfig.builders.json')) {
+            log('> Building builders..');
+            spawnCmd('tsc', ['-p', './tsconfig.builders.json'], true, exitOnError);
+        }
+        log('> Copying builders assets..');
+        await copyBuildersAssets();
     }
 };
 
@@ -219,6 +238,7 @@ const watch = async () => {
                 await cleanDir(DIST_PATH);
                 await buildLib();
                 await buildSchematics();
+                await buildBuilders();
                 log(`> ${styleText('green', 'Done!')}\n`);
                 break;
             case 'build-global':
@@ -226,6 +246,7 @@ const watch = async () => {
                 await cleanDir(DIST_PATH);
                 await buildLib();
                 await buildSchematics();
+                await buildBuilders();
                 await packDistAndInstallGlobally();
                 log(`> ${styleText('green', 'Done!')}\n`);
                 break;

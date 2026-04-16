@@ -20,7 +20,8 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     useNavigatorLanguage: true,
     loadLocaleExtra: false,
     useTranslations: true,
-    translationsPath: '/translations',
+    rootTranslationsPath: '/translations',
+    translationScopes: [],
     queryParamName: QUERY_PARAM_NAME,
     storage: localStorage,
     debug: G11nDebug.NO_DEBUG,
@@ -37,26 +38,45 @@ export const setLanguage = (value: string): void => {
 
 // --- HELPER(s) ---
 
-const loadTranslationFile = async (filePath: string, debug: G11nDebug = G11nDebug.NO_DEBUG): Promise<void> => {
+const loadTranslationFiles = async (
+    rootTranslationsPath: string,
+    translationScopes: string[],
+    filename: string,
+    debug: G11nDebug = G11nDebug.NO_DEBUG,
+): Promise<void> => {
     const debugMode = FORCE_DEBUG !== G11nDebug.NO_DEBUG ? FORCE_DEBUG : debug;
-    const response = await fetch(filePath);
-    if (response.status === 200) {
-        const { translations } = (await response.json()) as G11nFile | Record<string, undefined>;
-        if (translations) {
-            if (debugMode === G11nDebug.SHOW_KEYS) {
-                Object.entries(translations).forEach(([key, value]) => {
-                    translations[key] = `${value} (@${key})`;
-                });
-            } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
-                Object.keys(translations).forEach(key => {
-                    translations[key] = '-';
-                });
+    const translations: Record<string, string> = {};
+
+    // eslint-disable-next-line no-loops/no-loops
+    for (const scope of [...translationScopes, '']) {
+        const filePath = scope ? `${rootTranslationsPath}/${scope}/${filename}` : `${rootTranslationsPath}/${filename}`;
+        try {
+            const response = await fetch(filePath);
+            if (response.status === 200) {
+                const data = (await response.json()) as G11nFile | Record<string, undefined>;
+                if (data.translations) {
+                    Object.assign(translations, data.translations);
+                } else {
+                    console.warn(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
+                }
             }
-            loadTranslations(translations);
-        } else {
-            throw new Error(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
+        } catch (error) {
+            console.error(`[@hug/ngx-g11n] Could not load translation file: ${filePath}`);
+            console.error(error);
         }
     }
+
+    if (debugMode === G11nDebug.SHOW_KEYS) {
+        Object.entries(translations).forEach(([key, value]) => {
+            translations[key] = `${value} (@${key})`;
+        });
+    } else if (debugMode === G11nDebug.DUMMY_TRANSLATIONS) {
+        Object.keys(translations).forEach(key => {
+            translations[key] = '-';
+        });
+    }
+
+    loadTranslations(translations);
 };
 
 const refreshUrl = (localeId: string): void => {
@@ -84,7 +104,7 @@ const loadLanguage = async (
     // Load translations
     if (options.useTranslations) {
         const filename = locale.translationFilename ?? `${localeId}.json`;
-        await loadTranslationFile(`${options.translationsPath!}/${filename}`, options.debug);
+        await loadTranslationFiles(options.rootTranslationsPath!, options.translationScopes ?? [], filename, options.debug);
     }
 };
 
