@@ -1,7 +1,6 @@
 {
     "private": true,
     "scripts": {
-        "g11n": "ng run demo-app:extract-g11n",
         "ncu": "npx npm-check-updates -i --format=group --packageFile '{,projects/**/}package.json'",
         "prepare": "husky || true"
     },
@@ -24,6 +23,7 @@
         "zone.js": "~0.16.1"
     },
     "devDependencies": {
+        "@angular-devkit/architect": "^0.2102.0",
         "@angular/build": "^21.2.0",
         "@angular/cli": "~21.2.0",
         "@angular/compiler": "^21.2.0",
@@ -58,5 +58,6 @@
         "**/*.{js,json,ts,html}": [
             "eslint --fix"
         ]
-    }
+    },
+    "packageManager": "npm@11.12.1"
 }

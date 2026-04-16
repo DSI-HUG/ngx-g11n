@@ -35,17 +35,19 @@
             "type": "boolean",
             "default": false
         },
-        "translationsPath": {
-            "x-prompt": "Main translations path",
-            "description": "Main translations path",
+        "rootTranslationsPath": {
+            "x-prompt": "Path to the root translation folder",
+            "description": "Path to the root translation folder",
             "type": "string",
             "default": "/translations"
         },
-        "additionalPaths": {
-            "x-prompt": "Additionnal translations path (if multiple paths, separate them with a comma)",
-            "description": "Additionnal translations path (if multiple paths, separate them with a comma)",
-            "type": "string",
-            "default": ""
+        "translationScopes": {
+            "x-prompt": "Scopes to load translations from (comma-separated)",
+            "description": "Scopes to load translations from (comma-separated)",
+            "items": {
+                "type": "string"
+            },
+            "default": []
         },
         "queryParamName": {
             "x-prompt": "Query param name",
@@ -70,6 +72,12 @@
             "description": "Add locales [fr-CH, de-CH] by default",
             "type": "boolean",
             "default": true
+        },
+        "useEnhancedBuilder": {
+            "x-prompt": "Use enhanced builder",
+            "description": "Use enhanced builder",
+            "type": "boolean",
+            "default": false
         }
     },
     "required": [],

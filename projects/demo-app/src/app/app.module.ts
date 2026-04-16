@@ -3,7 +3,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { G11nDebug, G11nModule, withInterceptor, withLocales, withOptions } from '@hug/ngx-g11n';
+import { G11nDebug, G11nModule, withInterceptor, withLocales, withOptions } from '@hug/ngx-g11n/legacy';
 import { withDateFnsMaterial } from '@hug/ngx-g11n/material';
 
 import { routes } from './app.routes';
@@ -53,7 +53,7 @@ export class AppRoutingModule { }
             withInterceptor(),
             withOptions({
                 debug: G11nDebug.NO_DEBUG,
-                translationsPath: 'public/translations',
+                rootTranslationsPath: '/translations',
             }),
         ),
     ],

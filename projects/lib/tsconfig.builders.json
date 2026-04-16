@@ -1,8 +1,7 @@
-
 {
-	"extends": "../../tsconfig.hug.json",
-	"compilerOptions": {
-		"baseUrl": ".",
+    "extends": "../../tsconfig.hug.json",
+    "compilerOptions": {
+        "baseUrl": ".",
         "rootDir": "builders",
         "outDir": "../../dist/ngx-g11n/builders",
         "module": "commonjs",
@@ -23,6 +22,8 @@
             "jasmine",
             "node"
         ]
-	},
-	"include": ["builders/**/*.ts"]
+    },
+    "include": [
+        "builders/**/*.ts"
+    ]
 }

@@ -1,19 +1,18 @@
 import type { Version } from '@angular/core';
 import { chain, noop, type Rule, type SchematicContext, type Tree } from '@angular-devkit/schematics';
 import {
-    addAngularJsonAsset,
     addImportToFile,
     addImportToNgModule,
     addPackageJsonDependencies,
     addProviderToBootstrapApplication,
     application,
     type ChainableApplicationContext,
+    createOrUpdateFile,
     deployFiles,
     getAngularVersion,
     logError,
     modifyJsonFile,
     packageInstallTask,
-    removeFromJsonFile,
     replaceInFile,
     runAtEnd,
     schematic,
@@ -29,7 +28,8 @@ interface G11nOptions {
     defaultCurrency?: string;
     useNavigatorLanguage?: boolean;
     loadLocaleExtra?: boolean;
-    translationsPath?: string | string[];
+    rootTranslationsPath?: string | string[];
+    translationScopes?: string[];
     queryParamName?: string;
 }
 
@@ -38,12 +38,27 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     defaultCurrency: 'CHF',
     useNavigatorLanguage: true,
     loadLocaleExtra: false,
-    translationsPath: '/translations',
+    rootTranslationsPath: '/translations',
+    translationScopes: [],
     queryParamName: 'lang',
+};
+
+const resolveExtractI18nBuilder = (): string => {
+    try {
+        require.resolve('@angular/build/package.json');
+        return '@angular/build:extract-i18n';
+    } catch {
+        return '@angular-devkit/build-angular:extract-i18n';
+    }
 };
 
 const customizeProject = ({ project, tree }: ChainableApplicationContext, options: NgAddOptions, ngVersion: Version): Rule => {
     const rules: Rule[] = [];
+
+    // Normalize array options
+    if (typeof options.translationScopes === 'string') {
+        options.translationScopes = (options.translationScopes as string).split(',').map(s => s.trim()).filter(Boolean);
+    }
 
     // tsconfig.json
     if (Number(ngVersion.major) <= 14) {
@@ -51,52 +66,36 @@ const customizeProject = ({ project, tree }: ChainableApplicationContext, option
     }
 
     // package.json
-    // Remove if exists i18n script
-    rules.push(removeFromJsonFile('package.json', ['scripts', 'i18n']));
-    rules.push(modifyJsonFile('package.json', ['scripts', 'g11n'], `ng run ${project.name}:extract-g11n`));
+    rules.push(modifyJsonFile('package.json', ['scripts', 'i18n'], `ng extract-i18n ${project.name}`, false));
+
+    // .gitignore
+    if (options.useEnhancedBuilder) {
+        const gitignoreContent = tree.readText('.gitignore');
+        rules.push(createOrUpdateFile('.gitignore', `${gitignoreContent}\n\n*.bak.json`));
+    }
 
     // angular.json
-    // Remove if exists extract-i18n builder
-    const extractI18nBuilderPath = ['projects', project.name, 'architect', 'extract-i18n'];
-    rules.push(removeFromJsonFile('angular.json', [...extractI18nBuilderPath]));
-
-    // Add extract-g11n builder
-    const extractG11nPath = ['projects', project.name, 'architect', 'extract-g11n'];
-    if (project.assetsPath) {
-        rules.push(modifyJsonFile(
-            'angular.json',
-            [...extractG11nPath, 'options', 'outputPath'],
-            join(project.assetsPath, options.translationsPath),
-            () => 0),
-        );
-    }
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'outFile'], `${options.defaultLanguage}.json`, () => 1));
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'format'], 'json', () => 2));
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'options', 'exclusionKeyPrefixes'], ['_'], () => 3));
-
-    rules.push(modifyJsonFile('angular.json', [...extractG11nPath, 'builder'], '@hug/ngx-g11n:extract-g11n', () => 0));
-
+    const builder = options.useEnhancedBuilder ? '@hug/ngx-g11n:extract-i18n' : resolveExtractI18nBuilder();
+    const architectPath = ['projects', project.name, 'architect'];
+    const extractPath = [...architectPath, 'extract-i18n'];
+    const extractOptionsPath = [...extractPath, 'options'];
     rules.push(
         modifyJsonFile('angular.json', ['projects', project.name, 'i18n', 'sourceLocale'], options.defaultLanguage),
+        modifyJsonFile('angular.json', [...architectPath, 'build', 'options', 'i18nMissingTranslation'], 'error'),
+        modifyJsonFile('angular.json', [...extractPath, 'builder'], builder),
+        modifyJsonFile('angular.json', [...extractOptionsPath, 'format'], 'json'),
+        modifyJsonFile('angular.json', [...extractOptionsPath, 'outFile'], `${options.defaultLanguage}.json`),
     );
-
-    // Add assets if multiple translation file
-    const additionalPaths: string[] = (typeof options.additionalPaths === 'string') ? options.additionalPaths.split(',').map(p => p.trim()).filter(Boolean) : [];
-    const additionalPathsOutput: string[] = [];
-    if (additionalPaths.length) {
-        Object.entries(additionalPaths).forEach(([_, filePath]) => {
-            const moduleName = (/^.+\/([\w-]+)\/translations$/.exec(filePath))?.[1] ?? '';
-
-            if (moduleName.length) {
-                const moduleTranslationAssets: Record<string, string> = {
-                    'glob': '**/*',
-                    'input': filePath,
-                    'output': `assets/translations/${moduleName}`,
-                };
-                rules.push(addAngularJsonAsset(moduleTranslationAssets, project.name));
-                additionalPathsOutput.push(`assets/translations/${moduleName}`);
-            }
-        });
+    if (project.assetsPath) {
+        rules.push(modifyJsonFile(
+            'angular.json', [...extractOptionsPath, 'outputPath'], join(project.assetsPath, options.rootTranslationsPath)),
+        );
+    }
+    if (options.useEnhancedBuilder) {
+        rules.push(
+            modifyJsonFile('angular.json', [...extractOptionsPath, 'backupIgnoredTranslations'], false),
+            modifyJsonFile('angular.json', [...extractOptionsPath, 'ignoreKeyPatterns'], ['_.*']),
+        );
     }
 
     // Provide library
@@ -145,23 +144,15 @@ const customizeProject = ({ project, tree }: ChainableApplicationContext, option
         // ---- options
         const opts: G11nOptions = {};
         Object.entries(options).forEach(([key, value]) => {
-            if (key in DEFAULT_OPTIONS && DEFAULT_OPTIONS[key as keyof G11nOptions] !== value) {
+            if (key in DEFAULT_OPTIONS && JSON.stringify(DEFAULT_OPTIONS[key as keyof G11nOptions]) !== JSON.stringify(value)) {
                 // @ts-expect-error error expected
                 opts[key] = value as G11nOptions[keyof G11nOptions];
             }
         });
 
-        // Add translations path
-        if (additionalPaths.length && additionalPathsOutput.length) {
-            const translationPaths: string[] = [];
-            translationPaths.push(...additionalPathsOutput);
-            translationPaths.push(options.translationsPath ? options.translationsPath : DEFAULT_OPTIONS.translationsPath as string);
-            opts.translationsPath = translationPaths;
-        }
-
         if (Object.keys(opts).length) {
             rules.push(addImportToFile(configFile, 'withOptions', libName));
-            provider += `,\n  withOptions(${JSON.stringify(opts, null, 4)
+            provider += `,\nwithOptions(${JSON.stringify(opts, null, 4)
                 .replace(/"([^"]+)":/g, '$1:')
                 .replace(/"/g, '\'')})`;
         }
@@ -252,7 +243,7 @@ export default (options: NgAddOptions): Rule =>
                     if (!project.assetsPath) {
                         return logError('Deploying assets failed: no assets path found');
                     }
-                    return deployFiles(options, './files', join(project.assetsPath, options.translationsPath));
+                    return deployFiles(options, './files', join(project.assetsPath, options.rootTranslationsPath));
                 })
                 .rule(context => customizeProject(context, options, ngVersion))
                 .toRule(),

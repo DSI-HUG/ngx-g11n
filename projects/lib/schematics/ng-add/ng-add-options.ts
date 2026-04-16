@@ -4,10 +4,11 @@ export interface NgAddOptions {
     defaultCurrency: string;
     useNavigatorLanguage: boolean;
     loadLocaleExtra: boolean;
-    translationsPath: string;
-    additionalPaths: string;
+    rootTranslationsPath: string;
+    translationScopes: string[];
     queryParamName: string;
     material: boolean;
     interceptor: boolean;
     defaultLocales: boolean;
+    useEnhancedBuilder: boolean;
 }

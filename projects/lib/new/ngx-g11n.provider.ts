@@ -35,4 +35,3 @@ export const provideG11n = (...features: G11nFeature<Provider | EnvironmentProvi
         init(),
         features.map(feature => feature.providers),
     ]);
-

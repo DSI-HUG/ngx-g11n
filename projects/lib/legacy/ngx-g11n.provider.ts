@@ -30,12 +30,12 @@ export const withLocales = (locales: Record<string, G11nLocale>): G11nFeature =>
 
 export const withOptions = (options: G11nOptions): G11nFeature => ({
     providers: [
-        { provide: G11N_OPTIONS, useValue: { ...DEFAULT_OPTIONS, translationsPath: '/assets/translations', ...options } },
+        { provide: G11N_OPTIONS, useValue: { ...DEFAULT_OPTIONS, rootTranslationsPath: '/assets/translations', ...options } },
     ],
 });
 
 export const provideG11n = (...features: G11nFeature[]): Provider[] => [
     init(),
-    withOptions({ translationsPath: '/assets/translations' }).providers,
+    withOptions({ rootTranslationsPath: '/assets/translations' }).providers,
     features.map(feature => feature.providers),
 ];

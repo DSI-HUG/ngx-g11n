@@ -51,13 +51,15 @@ ng add @hug/ngx-g11n
 > 2.  **? Default currency**: *the default currency used by your application*
 > 3.  **? Use navigator language**: *whether to use the navigator language*
 > 4.  **? Use Angular locale extra**: *whether to also register Angular locale extra*
-> 5.  **? Translations path**: *the path to your translation files*
-> 6.  **? Query param name**: *the name of the query parameter used to define the language*
-> 7.  **? Auto-inject locale in request headers**: *whether to inject the language in every requests header*
-> 8.  **? Add support for Angular Material**: *whether to also configure things for Angular Material*
-> 9.  **? Add locales [fr-CH, de-CH] by defaults**: *whether to add fr-CH and de-CH by default*
+> 5.  **? Root translations path**: *the path to the root translation folder*
+> 6.  **? Translation scopes**: *the scopes to load translations from (comma-separated)*
+> 7.  **? Query param name**: *the name of the query parameter used to define the language*
+> 8.  **? Auto-inject locale in request headers**: *whether to inject the language in every requests header*
+> 9.  **? Add support for Angular Material**: *whether to also configure things for Angular Material*
+> 10.  **? Add locales [fr-CH, de-CH] by defaults**: *whether to add fr-CH and de-CH by default*
+> 11.  **? Use enhanced builder**: *whether to use the library's enhanced builder*
 >
-> And based on your answers, it will also potentialy perform the following actions:
+> And based on your answers, it will also potentially perform the following actions:
 >
 > -   Run `ng add @angular/localize` schematic
 > -   Install `@angular/material-date-fns-adapter` as a dev dependency
@@ -68,7 +70,7 @@ ng add @hug/ngx-g11n
 >     "projects": {
 >       "my-app": {
 >         "i18n" {
->            "sourceLocale": "fr-CH"
+>           "sourceLocale": "fr-CH"
 >         },
 >         "architect": {
 >           "build": {
@@ -76,12 +78,12 @@ ng add @hug/ngx-g11n
 >               "i18nMissingTranslation": "error"
 >             }
 >           },
->           "extract-g11n": {
->             "builder": "@hug/ngx-g11n:extract-g11n",
+>           "extract-i18n": {
+>             "builder": "@angular/build:extract-i18n",
 >             "options": {
->               "outputPath": "projects/my-app/translations",
+>               "outputPath": "public/translations",
 >               "outFile": "fr-CH.json",
->               "exclusionKeyPrefixes": [ "_" ]
+>               "format": "json"
 >             }
 >           }
 >         }
@@ -103,7 +105,7 @@ ng update @hug/ngx-g11n
 
 This library uses the official [@angular/localize][angular-localize-url] package under the hood, so manage your translations just as you would with it.
 
-Then use the command `npm run g11n` to extract the marked messages from your components into a single source language file.
+Then use the command `ng extract-i18n` to extract the marked messages from your components into a single source language file.
 
 #### Examples
 
@@ -127,91 +129,6 @@ Then use the command `npm run g11n` to extract the marked messages from your com
 const msgToTranslate = $localize`:@@demoText:Message to translate`;
 ```
 
-## Builder extract-g11n
-The extract-g11n builder is an Angular CLI builder that:
-
-* Runs Angular’s built‑in i18n extraction
-* Outputs JSON translations at provided outpuPath
-* Cleans extracted keys by removing all translations matching configurable exclusion prefixes (ex: "_")
-* Does NOT require defining extract-i18n in your app’s angular.json
-
-> **Made for projects with embedded translation files:** 
-> This builder is designed to support projects that include **multiple translation sources**, each containing their own translation keys.
-> Keys originating from embedded translation files can be automatically removed after extraction using the `exclusionKeyPrefixes` option.
-> Works only with `json` translation files.
-
-
-### Configuration in angular.json
-```json
-"projects": {
-  "my-app": {
-    "architect": {
-      "extract-g11n": {
-        "builder": "@hug/ngx-g11n:extract-g11n",
-        "options": {
-          "outputPath": "projects/my-app/translations",
-          "outFile": "fr-CH.json",
-          "format": "json",
-          "exclusionKeyPrefixes": [ "_" ],
-          "backUpExcludedKeys": true
-        }
-      }
-    }
-  }
-}
-```
-
-### Options
-| Name | Type | Description | Values | Required | Default value
-|---|---|---|---|---|---|
-| outputPath | string |  Path where output will be placed.| - | Yes | - |
-| outFile | string | Name of the file to output. | - | Yes | - |
-| format | string | Output format for the generated file. | xmb, xlf, xlif, xliff, xlf2, xliff2, json, arb, legacy-migrate | Yes | json |
-| exclusionKeyPrefixes | string[] | List of key prefixes to remove after i18n extraction | - | No | [  ] |
-| backUpExcludedKeys | boolean | Whether to create a backup of excluded keys in a separate file. | true, false | No | false |
-
-> **Recommendation:**  
-> Prefix all embedded translation keys with "_" (e.g., "_featureTitle")  
-> Then set:  
-> 
-> ```json
-> "exclusionKeyPrefixes": ["_"]
-> ```  
-> 
-> So these keys are automatically removed during extraction.
-
-> **💡Extraction tips:**  
-> Set:  
-> 
-> ```json
-> "backUpExcludedKeys": true
-> ```  
-> 
-> To backed up all removed keys at outputPath location 
-
-
-### 🚀 Running the builder
-
-#### Via Angular CLI:
-```sh
-npm run my-app:extract-g11n
-```
-
-#### Via NPM script:
-Add this to package.json:
-```json
-
-{
-  "scripts": {
-    "g11n": "ng run my-app:extract-g11n"
-  }
-}
-
-```
-Then run
-```sh
-npm run g11n
-```
 
 ## Helpers
 
@@ -334,11 +251,6 @@ provideG11n(withInterceptor())
 
 This feature will override the defaults library options.
 
-If additionalPaths are provided:
-
-translationsPath is **always** converted to an array and **always** includes the main path as the last element whether it is default or custom.
-The order is important: the application translation file must always remain last in order to allow key overriding when needed.
-
 ```ts
 // import { withOptions } from '@hug/ngx-g11n/legacy'; /* for ng14 apps */
 import { withOptions } from '@hug/ngx-g11n';
@@ -354,8 +266,10 @@ interface G11nOptions {
     loadLocaleExtra?: boolean;
     /** @default true */
     useTranslations?: boolean;
-    /** @default '/translations' ('/assets/translations' for legacy apps) */
-    translationsPath?: string | string[]; /* array is for multiple translation paths */
+    /** @default '/translations' (or '/assets/translations' for legacy apps) */
+    rootTranslationsPath?: string;
+    /** @default [] */
+    translationScopes?: string[];
     /** @default 'lang' */
     queryParamName?: string;
     /** @default localStorage */
@@ -367,16 +281,52 @@ interface G11nOptions {
 provideG11n(withOptions(options))
 ```
 
-#### # Assets Configuration
-If you provide additional translation paths, the schematic automatically adds them to the build.options.assets section of your angular.json.
 
-```ts
-{
-  "glob": "**/*",
-  "input": "src/app/common/feature-a/translations",
-  "output": "assets/translations/feature-a"
+## Enhanced builder
+
+This library also provides a custom **extract-i18n** builder that extends Angular's default extraction workflow with additional features.
+
+It acts as a post-processing layer on top of Angular’s extraction.
+
+### Additional features
+
+#### # ignoreKeyPatterns
+
+After Angular completes the extraction, the builder scans all keys in the generated JSON file and removes those matching the provided regex patterns.
+
+In projects with **embedded translation sources** (e.g. shared libraries or third-party modules), extraction often includes unwanted keys.
+
+This option ensures your final translation files only contain **application-relevant keys**, keeping them clean and maintainable.
+
+#### # backupIgnoredTranslations
+
+When used together with ignoreKeyPatterns, all filtered-out keys are written to a secondary file instead of being discarded.
+
+### Usage
+
+Configure the builder in your `angular.json` file:
+
+```json
+"projects": {
+  "my-app": {
+    "architect": {
+      "extract-i18n": {
+        "builder": "@hug/ngx-g11n:extract-i18n",
+        "options": {
+          "outputPath": "public/translations",
+          "outFile": "fr-CH.json",
+          "format": "json",
+          "ignoreKeyPatterns": ["(keyA|keyB)_.*", "keyC_.*"],
+          "backupIgnoredTranslations": true
+        }
+      }
+    }
+  }
 }
 ```
+
+Then simply run `ng extract-i18n`.
+
 
 ## Heuristic
 
@@ -393,12 +343,6 @@ And if a language is found using the above criteria:
 2. Check for a match on the `base language` only *(e.g., 'en')*
 3. Check for a match on the `base language` with any `region` *(e.g., 'en-GB')*
 
-## Runtime Behavior
-
-At runtime:
-
-- All translation files are loaded
-- Files are merged in order
 
 ## Debug
 
