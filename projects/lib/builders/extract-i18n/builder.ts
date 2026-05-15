@@ -45,13 +45,16 @@ const runExtractedFileCleanUp = async (context: BuilderContext, options: Options
         const data = JSON.parse(await readFile(outFile, 'utf-8')) as Record<'translations', string[]>;
         if (Object.hasOwn(data, 'translations')) {
             const regexList = options.ignoreKeyPatterns?.map(pattern => new RegExp(`^${pattern}$`)) ?? [];
-            const { matched, remaining } = Object.entries(data.translations).reduce(
+            const { matched, remaining } = Object.entries(data.translations).reduce<{
+                matched: Record<string, string>;
+                remaining: Record<string, string>;
+            }>(
                 (acc, [key, value]) => {
                     const match = regexList.some(rx => rx.test(key));
                     (match ? acc.matched : acc.remaining)[key] = value;
                     return acc;
                 },
-                { matched: {} as Record<string, string>, remaining: {} as Record<string, string> },
+                { matched: {}, remaining: {} },
             );
 
             if (Object.keys(matched).length) {
@@ -71,7 +74,6 @@ const runExtractedFileCleanUp = async (context: BuilderContext, options: Options
             } else {
                 context.logger.warn('→ (skipped) No matching keys to clean.');
             }
-
         } else {
             context.logger.warn('→ (skipped) No "translations" property found in file.');
             return;
