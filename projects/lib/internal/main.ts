@@ -38,10 +38,20 @@ export const setLanguage = (value: string): void => {
 
 // --- HELPER(s) ---
 
+const mergeTranslationsFromResponse = async (translations: Record<string, string>, response: Response, filePath: string): Promise<void> => {
+    const data = (await response.json()) as G11nFile | Record<string, undefined>;
+    if (data.translations) {
+        Object.assign(translations, data.translations);
+    } else {
+        console.warn(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
+    }
+};
+
 const loadTranslationFiles = async (
     rootTranslationsPath: string,
     translationScopes: string[],
     filename: string,
+    localeId: string,
     debug: G11nDebug = G11nDebug.NO_DEBUG,
 ): Promise<void> => {
     const debugMode = FORCE_DEBUG !== G11nDebug.NO_DEBUG ? FORCE_DEBUG : debug;
@@ -53,11 +63,14 @@ const loadTranslationFiles = async (
         try {
             const response = await fetch(filePath);
             if (response.status === 200) {
-                const data = (await response.json()) as G11nFile | Record<string, undefined>;
-                if (data.translations) {
-                    Object.assign(translations, data.translations);
-                } else {
-                    console.warn(`[@hug/ngx-g11n] No translations found in file: ${filePath}`);
+                await mergeTranslationsFromResponse(translations, response, filePath);
+            } else if (response.status === 404) {
+                const baseLanguage = new Intl.Locale(localeId).language;
+                const fallbackFilePath = scope ? `${rootTranslationsPath}/${scope}/${baseLanguage}.json` : `${rootTranslationsPath}/${baseLanguage}.json`;
+                const fallbackResponse = await fetch(fallbackFilePath);
+                if (fallbackResponse.status === 200) {
+                    await mergeTranslationsFromResponse(translations, fallbackResponse, fallbackFilePath);
+                    console.warn(`[@hug/ngx-g11n] Translation file "${filePath}" not found (will use "${fallbackFilePath}" instead)`);
                 }
             }
         } catch (error) {
@@ -104,7 +117,7 @@ const loadLanguage = async (
     // Load translations
     if (options.useTranslations) {
         const filename = locale.translationFilename ?? `${localeId}.json`;
-        await loadTranslationFiles(options.rootTranslationsPath!, options.translationScopes ?? [], filename, options.debug);
+        await loadTranslationFiles(options.rootTranslationsPath!, options.translationScopes ?? [], filename, localeId, options.debug);
     }
 };
 
