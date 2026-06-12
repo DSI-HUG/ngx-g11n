@@ -97,13 +97,14 @@ const loadLanguage = async (
 
     // Register locale data
     const locale = locales[localeId];
+    const language = new Intl.Locale(localeId).language;
     const localeBase = (await locale.base()).default;
     const localeExtra = options.loadLocaleExtra && locale.extra ? (await locale.extra()).default : undefined;
     registerLocaleData(localeBase, localeId, localeExtra);
 
     // Load translations
     if (options.useTranslations) {
-        const filename = locale.translationFilename ?? `${localeId}.json`;
+        const filename = locale.translationFilename ?? `${language}.json`;
         await loadTranslationFiles(options.rootTranslationsPath!, options.translationScopes ?? [], filename, options.debug);
     }
 };

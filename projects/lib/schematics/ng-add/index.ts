@@ -75,6 +75,7 @@ const customizeProject = ({ project, tree }: ChainableApplicationContext, option
     }
 
     // angular.json
+    const locale = new Intl.Locale(options.defaultLanguage);
     const builder = options.useEnhancedBuilder ? '@hug/ngx-g11n:extract-i18n' : resolveExtractI18nBuilder();
     const architectPath = ['projects', project.name, 'architect'];
     const extractPath = [...architectPath, 'extract-i18n'];
@@ -84,7 +85,7 @@ const customizeProject = ({ project, tree }: ChainableApplicationContext, option
         modifyJsonFile('angular.json', [...architectPath, 'build', 'options', 'i18nMissingTranslation'], 'error'),
         modifyJsonFile('angular.json', [...extractPath, 'builder'], builder),
         modifyJsonFile('angular.json', [...extractOptionsPath, 'format'], 'json'),
-        modifyJsonFile('angular.json', [...extractOptionsPath, 'outFile'], `${options.defaultLanguage}.json`),
+        modifyJsonFile('angular.json', [...extractOptionsPath, 'outFile'], `${locale.language}.json`),
     );
     if (project.assetsPath) {
         rules.push(modifyJsonFile(
@@ -119,14 +120,14 @@ const customizeProject = ({ project, tree }: ChainableApplicationContext, option
         } else {
             rules.push(addImportToFile(configFile, 'withLocales', libName));
 
-            const getLocale = (locale: string): string => {
-                let str = `'${locale}': {`;
-                str += `\n    base: () => import('@angular/common/locales/${locale}')`;
+            const getLocale = (value: string): string => {
+                let str = `'${value}': {`;
+                str += `\n    base: () => import('@angular/common/locales/${value}')`;
                 if (options.loadLocaleExtra) {
-                    str += `,\n    extra: () => import('@angular/common/locales/extra/${locale}')`;
+                    str += `,\n    extra: () => import('@angular/common/locales/extra/${value}')`;
                 }
                 if (options.material) {
-                    str += `,\n    datefns: () => import('date-fns/locale/${locale}')`;
+                    str += `,\n    datefns: () => import('date-fns/locale/${value}')`;
                 }
                 str += '\n  }';
                 return str;
