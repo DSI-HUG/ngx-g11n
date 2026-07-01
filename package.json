@@ -28,14 +28,14 @@
         "@angular/cli": "~21.2.11",
         "@angular/compiler": "^21.2.13",
         "@angular/compiler-cli": "^21.2.13",
-        "@commitlint/cli": "^21.0.2",
-        "@commitlint/config-conventional": "^21.0.2",
+        "@commitlint/cli": "^21.2.0",
+        "@commitlint/config-conventional": "^21.2.0",
         "@hug/eslint-config": "^25.0.1",
         "cpy": "^13.2.2",
         "cross-spawn": "^7.0.6",
         "husky": "^9.1.7",
         "jsdom": "^29.1.1",
-        "lint-staged": "^17.0.7",
+        "lint-staged": "^17.0.8",
         "ng-packagr": "^21.2.3",
         "ts-node": "^10.9.2",
         "tslib": "^2.8.1",
@@ -52,5 +52,5 @@
             "eslint --fix"
         ]
     },
-    "packageManager": "npm@11.17.0"
+    "packageManager": "npm@11.18.0"
 }
