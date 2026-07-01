@@ -1,0 +1,19 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "../../out-tsc/lib",
+        "declaration": true,
+        "declarationMap": true,
+        "types": [
+            "vitest/globals"
+        ]
+    },
+    "include": [
+        "**/*.ts"
+    ],
+    "exclude": [
+        "builders/*",
+        "schematics/*"
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.builders.json",
+    "compilerOptions": {
+        "composite": false,
+        "incremental": false
+    },
+    "exclude": [
+        "**/*.spec.ts"
+    ]
+}

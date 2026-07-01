@@ -1,7 +1,14 @@
+import { register } from 'ts-node';
+register({
+    compilerOptions: {
+        module: 'commonjs', // Ensures compatibility with the schematics engine
+    },
+});
+
 import type { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { type ApplicationDefinition, getProjectFromWorkspace } from '@hug/ngx-schematics-utilities';
 
-import { appTest1, appTest2, getCleanAppTree, runner } from '../schematics.spec';
+import { appTest1, appTest2, getCleanAppTree, runner } from '../utils.spec';
 import { DEFAULT_OPTIONS } from '.';
 import type { NgAddOptions } from './ng-add-options';
 
@@ -25,7 +32,7 @@ import type { NgAddOptions } from './ng-add-options';
 
             it('should run without issues', async () => {
                 const test$ = runner.runSchematic('ng-add', defaultOptions, tree);
-                await expectAsync(test$).toBeResolved();
+                await expect(test$).resolves.toBeDefined();
                 expect(tree.files.length).toEqual(nbFiles + 1);
             });
 

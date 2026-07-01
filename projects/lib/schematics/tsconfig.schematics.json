@@ -1,29 +1,32 @@
 {
-    "extends": "../../tsconfig.hug.json",
+    "extends": "../../../tsconfig.hug.json",
     "compilerOptions": {
-        "baseUrl": ".",
-        "rootDir": "builders",
-        "outDir": "../../dist/ngx-g11n/builders",
+        "rootDir": ".",
+        "outDir": "../../../dist/ngx-g11n/schematics",
+        "moduleResolution": "node",
         "module": "commonjs",
         "target": "ES2022",
         "lib": [
             "ES2022",
             "dom"
         ],
-        "moduleResolution": "node",
+        "types": [
+            "vitest/globals",
+            "node"
+        ],
+        "composite": true,
         "declaration": true,
         "declarationMap": false,
         "noEmitOnError": true,
         "skipDefaultLibCheck": true,
         "strictNullChecks": true,
         "skipLibCheck": true,
-        "sourceMap": true,
-        "types": [
-            "jasmine",
-            "node"
-        ]
+        "sourceMap": true
     },
     "include": [
-        "builders/**/*.ts"
+        "**/*.ts"
+    ],
+    "exclude": [
+        "*/files/**/*"
     ]
 }

@@ -1,5 +1,5 @@
 /**
- * Usage: $ node ./make.mjs <watch|lint|test-lib|test-schematics|test-ci|build|build-global>
+ * Usage: $ node ./make.mjs <watch|build|build-global>
  */
 
 import { watch as chokidarWatch } from 'chokidar';
@@ -120,9 +120,9 @@ const packDistAndInstallGlobally = async () => {
 
 const buildSchematics = async (exitOnError = true) => {
     if (existsSync(SCHEMATICS_SRC_PATH)) {
-        if (existsSync('tsconfig.schematics.json')) {
+        if (existsSync('./schematics/tsconfig.schematics.json')) {
             log('> Building schematics..');
-            spawnCmd('tsc', ['-p', './tsconfig.schematics.json'], true, exitOnError);
+            spawnCmd('tsc', ['-p', './schematics/tsconfig.schematics.prod.json'], true, exitOnError);
         }
         log('> Copying schematics assets..');
         await copySchematicsAssets();
@@ -131,9 +131,9 @@ const buildSchematics = async (exitOnError = true) => {
 
 const buildBuilders = async (exitOnError = true) => {
     if (existsSync(BUILDERS_SRC_PATH)) {
-        if (existsSync('tsconfig.builders.json')) {
+        if (existsSync('./builders/tsconfig.builders.json')) {
             log('> Building builders..');
-            spawnCmd('tsc', ['-p', './tsconfig.builders.json'], true, exitOnError);
+            spawnCmd('tsc', ['-p', './builders/tsconfig.builders.prod.json'], true, exitOnError);
         }
         log('> Copying builders assets..');
         await copyBuildersAssets();
@@ -146,55 +146,12 @@ const buildLib = async (exitOnError = true) => {
         if (LIBRARY_TYPE === 'ng') {
             spawnCmd('ng', ['build', NG_PROJECT_LIBRARY_NAME, '--configuration', 'production'], true, exitOnError);
         } else {
-            spawnCmd('tsc', ['-p', './tsconfig.prod.json'], true, exitOnError);
+            spawnCmd('tsc', ['-p', './tsconfig.lib.prod.json'], true, exitOnError);
         }
     }
 
     log('> Copying assets..');
     await copyAssets();
-};
-
-const test = (tsconfigPath, ci = false) => {
-    if (existsSync(tsconfigPath)) {
-        const args = [
-            `--project=${tsconfigPath}`,
-            '../../node_modules/jasmine/bin/jasmine.js',
-            '--config=jasmine.json',
-        ];
-        if (!ci) {
-            args.unshift('--respawn', '--transpile-only');
-        }
-        spawnCmd('ts-node-dev', args);
-    }
-};
-
-const testSchematics = (ci = false) => {
-    if (existsSync(SCHEMATICS_SRC_PATH)) {
-        test('tsconfig.schematics.json', ci);
-    }
-};
-
-const testLib = (ci = false) => {
-    if (existsSync(LIBRARY_SRC_PATH)) {
-        if (LIBRARY_TYPE === 'ng') {
-            const ligArgs = ['test', 'lib'];
-            if (ci) {
-                ligArgs.push('--configuration', 'ci');
-            }
-            spawnCmd('ng', ligArgs, true, false);
-        } else {
-            test('tsconfig.spec.json', ci);
-        }
-    }
-};
-
-const lint = () => {
-    const lintArgs = [`./${LIBRARY_SRC}/**/*.{ts,html}`];
-    if (existsSync(SCHEMATICS_SRC_PATH)) {
-        lintArgs.push(`./${SCHEMATICS_SRC}/**/*.{ts,html}`);
-    }
-    lintArgs.push('--ignore-pattern', '**/files/**/*', '--ignore-pattern', '**/*.spec.ts');
-    spawnCmd('eslint', lintArgs);
 };
 
 const watch = async () => {
@@ -219,19 +176,6 @@ const watch = async () => {
             case 'watch':
                 registerExitEvents();
                 await watch();
-                break;
-            case 'lint':
-                lint();
-                break;
-            case 'test-lib':
-                testLib();
-                break;
-            case 'test-schematics':
-                testSchematics();
-                break;
-            case 'test-ci':
-                testLib(true);
-                testSchematics(true);
                 break;
             case 'build':
                 log('> Cleaning..');

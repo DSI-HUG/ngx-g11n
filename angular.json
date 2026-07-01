@@ -1,10 +1,11 @@
 {
     "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
     "version": 1,
-    "newProjectRoot": "projects",
     "cli": {
+        "packageManager": "npm",
         "analytics": false
     },
+    "newProjectRoot": "projects",
     "projects": {
         "demo-app": {
             "projectType": "application",
@@ -23,19 +24,18 @@
                 "build": {
                     "builder": "@angular/build:application",
                     "options": {
+                        "browser": "projects/demo-app/src/main.ts",
+                        "tsConfig": "projects/demo-app/tsconfig.app.json",
+                        "inlineStyleLanguage": "scss",
                         "i18nMissingTranslation": "error",
                         "outputPath": {
                             "base": "dist/demo-app",
                             "browser": ""
                         },
-                        "index": "projects/demo-app/src/index.html",
-                        "browser": "projects/demo-app/src/main.ts",
                         "polyfills": [
                             "zone.js",
                             "@angular/localize/init"
                         ],
-                        "tsConfig": "projects/demo-app/tsconfig.app.json",
-                        "inlineStyleLanguage": "scss",
                         "assets": [
                             {
                                 "glob": "**/*",
@@ -56,13 +56,13 @@
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "500kb",
-                                    "maximumError": "1mb"
+                                    "maximumWarning": "500kB",
+                                    "maximumError": "1MB"
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "2kb",
-                                    "maximumError": "4kb"
+                                    "maximumWarning": "4kB",
+                                    "maximumError": "8kB"
                                 }
                             ],
                             "outputHashing": "all"
@@ -79,7 +79,7 @@
                     "builder": "@hug/ngx-g11n:extract-i18n",
                     "options": {
                         "outputPath": "projects/demo-app/public/translations",
-                        "outFile": "fr-CH.json",
+                        "outFile": "fr.json",
                         "format": "json",
                         "backupIgnoredTranslations": true,
                         "ignoreKeyPatterns": [
@@ -111,34 +111,14 @@
                     }
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
-                    "options": {
-                        "polyfills": [
-                            "zone.js",
-                            "zone.js/testing",
-                            "@angular/localize/init"
-                        ],
-                        "tsConfig": "projects/demo-app/tsconfig.spec.json",
-                        "inlineStyleLanguage": "scss",
-                        "assets": [
-                            {
-                                "glob": "**/*",
-                                "input": "projects/demo-app/public"
-                            }
-                        ],
-                        "styles": [
-                            "@angular/material/prebuilt-themes/azure-blue.css",
-                            "projects/demo-app/src/styles.scss"
-                        ],
-                        "scripts": []
-                    }
+                    "builder": "@angular/build:unit-test"
                 }
             }
         },
         "lib": {
             "projectType": "library",
             "root": "projects/lib",
-            "sourceRoot": "projects/lib/src",
+            "sourceRoot": "projects/lib",
             "prefix": "lib",
             "architect": {
                 "build": {
@@ -148,59 +128,15 @@
                     },
                     "configurations": {
                         "production": {
-                            "tsConfig": "projects/lib/tsconfig.prod.json"
+                            "tsConfig": "projects/lib/tsconfig.lib.prod.json"
                         },
                         "development": {
-                            "tsConfig": "projects/lib/tsconfig.json"
+                            "tsConfig": "projects/lib/tsconfig.lib.json"
                         }
                     },
                     "defaultConfiguration": "production"
-                },
-                "test": {
-                    "builder": "@angular/build:karma",
-                    "configurations": {
-                        "ci": {
-                            "browsers": "ChromeHeadless",
-                            "progress": false,
-                            "watch": false
-                        }
-                    },
-                    "options": {
-                        "tsConfig": "projects/lib/tsconfig.spec.json",
-                        "polyfills": [
-                            "zone.js",
-                            "zone.js/testing",
-                            "@angular/localize/init"
-                        ]
-                    }
                 }
             }
-        }
-    },
-    "schematics": {
-        "@schematics/angular:component": {
-            "type": "component"
-        },
-        "@schematics/angular:directive": {
-            "type": "directive"
-        },
-        "@schematics/angular:service": {
-            "type": "service"
-        },
-        "@schematics/angular:guard": {
-            "typeSeparator": "."
-        },
-        "@schematics/angular:interceptor": {
-            "typeSeparator": "."
-        },
-        "@schematics/angular:module": {
-            "typeSeparator": "."
-        },
-        "@schematics/angular:pipe": {
-            "typeSeparator": "."
-        },
-        "@schematics/angular:resolver": {
-            "typeSeparator": "."
         }
     }
 }
