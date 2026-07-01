@@ -1,5 +1,6 @@
 import {
     type HttpEvent, type HttpHandlerFn, type HttpRequest, provideHttpClient, withInterceptors,
+    withXhr,
 } from '@angular/common/http';
 import { type EnvironmentProviders, inject, LOCALE_ID, makeEnvironmentProviders, type Provider } from '@angular/core';
 import {
@@ -9,7 +10,7 @@ import type { Observable } from 'rxjs';
 
 export const withInterceptor = (): G11nFeature<EnvironmentProviders> => ({
     providers: [
-        provideHttpClient(withInterceptors([
+        provideHttpClient(withXhr(), withInterceptors([
             (req: HttpRequest<unknown>, next$: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
                 const headers = req.headers.set('Accept-Language', inject(LOCALE_ID));
                 return next$(req.clone({ headers }));

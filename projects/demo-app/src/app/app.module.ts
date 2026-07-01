@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { Component, NgModule } from '@angular/core';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { G11nDebug, G11nModule, withInterceptor, withLocales, withOptions } from '@hug/ngx-g11n/legacy';
@@ -11,6 +11,7 @@ import { routes } from './app.routes';
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     // eslint-disable-next-line @angular-eslint/prefer-standalone
     standalone: false,
 })
@@ -27,7 +28,7 @@ export class AppRoutingModule { }
         AppComponent,
     ],
     providers: [
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
     ],
     imports: [
         AppRoutingModule,

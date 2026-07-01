@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { CurrencyPipe, DatePipe, DecimalPipe, I18nPluralPipe, PercentPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, type OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, type OnInit } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +12,7 @@ import { format } from 'date-fns';
     selector: 'app-demo',
     templateUrl: './demo.component.html',
     styleUrl: './demo.component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         DatePipe,
         CurrencyPipe,
