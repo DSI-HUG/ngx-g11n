@@ -71,7 +71,9 @@ const customizeProject = ({ project, tree }: ChainableApplicationContext, option
     // .gitignore
     if (options.useEnhancedBuilder) {
         const gitignoreContent = tree.readText('.gitignore');
-        rules.push(createOrUpdateFile('.gitignore', `${gitignoreContent}\n\n*.bak.json`));
+        if (!gitignoreContent.includes('*.bak.json')) {
+            rules.push(createOrUpdateFile('.gitignore', `${gitignoreContent}\n\n*.bak.json`));
+        }
     }
 
     // angular.json
@@ -223,8 +225,8 @@ const customizeProject = ({ project, tree }: ChainableApplicationContext, option
 };
 
 export default (options: NgAddOptions): Rule =>
-    async (): Promise<Rule> => {
-        const ngVersion = await getAngularVersion();
+    (): Rule => {
+        const ngVersion = getAngularVersion();
         return schematic('@hug/ngx-g11n', [
             workspace()
                 .spawn('ng', ['add', '@angular/localize', '--skip-confirmation'])

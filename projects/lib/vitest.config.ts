@@ -7,6 +7,7 @@ export default defineConfig({
         projects: [{
             test: {
                 name: 'lib',
+                environment: 'jsdom',
                 globals: true,
                 include: [
                     '**/*.spec.ts',

@@ -31,16 +31,15 @@
         "@commitlint/cli": "^21.2.1",
         "@commitlint/config-conventional": "^21.2.0",
         "@hug/eslint-config": "^26.0.0",
+        "chokidar": "^5.0.0",
         "cpy": "^13.2.2",
         "cross-spawn": "^7.0.6",
         "husky": "^9.1.7",
         "jsdom": "^29.1.1",
         "lint-staged": "^17.0.8",
         "ng-packagr": "^22.0.1",
-        "ts-node": "^10.9.2",
         "tslib": "^2.8.1",
         "typescript": "~6.0.3",
-        "vite-plugin-commonjs": "^0.10.4",
         "vitest": "^4.1.10"
     },
     "commitlint": {
