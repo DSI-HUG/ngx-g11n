@@ -135,7 +135,7 @@
                         }
                     },
                     "defaultConfiguration": "production"
-                }
+            	}
             }
         }
     }

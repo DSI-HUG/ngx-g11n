@@ -89,11 +89,20 @@ const runExtractedFileCleanUp = async (context: BuilderContext, options: Options
 const runExtractI18nBuilder = async (context: BuilderContext, projectName: string, options: Options): Promise<void> => {
     context.logger.info(`🚀 [1/2] Running Angular extract-i18n for project "${projectName}"...`);
 
-    // Normalize options to only keep keys that are really defined
+    /**
+     * Normalize options.
+     *
+     * This package's schematics uses a broader schema than what the angular's extracti18n builder needs.
+     * So we loop over each options and only keep them if they are known angular's options and not undefined.
+     * Special note:
+     * - `buildTarget` was introduced in ng17
+     * - `browserTarget` was removed in ng19
+     * - `i18nDuplicateTranslation` was introduced in ng20
+     */
     const builderOptions = Object.fromEntries(
-        ['buildTarget', 'format', 'i18nDuplicateTranslation', 'outFile', 'outputPath', 'progress']
-            .filter((key): key is keyof Options => key in options)
-            .map(key => [key, options[key]]),
+        ['buildTarget', 'browserTarget', 'format', 'i18nDuplicateTranslation', 'outFile', 'outputPath', 'progress']
+            .filter((k): k is keyof Options => k in options && options[k as keyof Options] !== undefined)
+            .map(k => [k, options[k]]),
     ) as Partial<Options>;
 
     const extraction = await context.scheduleBuilder(

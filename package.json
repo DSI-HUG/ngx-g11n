@@ -1,7 +1,7 @@
 {
     "private": true,
     "scripts": {
-        "ncu": "npx npm-check-updates -i --format=group --packageFile '{,projects/**/}package.json'",
+        "typecheck": "tsc --build --noEmit",
         "prepare": "husky || true"
     },
     "workspaces": [
@@ -9,28 +9,28 @@
         "projects/lib"
     ],
     "dependencies": {
-        "@angular/cdk": "^21.2.11",
-        "@angular/common": "^22.0.4",
-        "@angular/core": "^22.0.4",
-        "@angular/forms": "^22.0.4",
-        "@angular/localize": "^22.0.4",
-        "@angular/material": "^21.2.11",
-        "@angular/material-date-fns-adapter": "^21.2.11",
-        "@angular/platform-browser": "^22.0.4",
-        "@angular/router": "^22.0.4",
+        "@angular/cdk": "^22.0.4",
+        "@angular/common": "^22.0.6",
+        "@angular/core": "^22.0.6",
+        "@angular/forms": "^22.0.6",
+        "@angular/localize": "^22.0.6",
+        "@angular/material": "^22.0.4",
+        "@angular/material-date-fns-adapter": "^22.0.4",
+        "@angular/platform-browser": "^22.0.6",
+        "@angular/router": "^22.0.6",
         "date-fns": "^4.4.0",
         "rxjs": "7.8.2",
         "zone.js": "~0.16.2"
     },
     "devDependencies": {
-        "@angular-devkit/architect": "^0.2200.4",
-        "@angular/build": "^22.0.4",
-        "@angular/cli": "~22.0.4",
-        "@angular/compiler": "^22.0.4",
-        "@angular/compiler-cli": "^22.0.4",
-        "@commitlint/cli": "^21.2.0",
+        "@angular-devkit/architect": "^0.2200.6",
+        "@angular/build": "^22.0.6",
+        "@angular/cli": "~22.0.6",
+        "@angular/compiler": "^22.0.6",
+        "@angular/compiler-cli": "^22.0.6",
+        "@commitlint/cli": "^21.2.1",
         "@commitlint/config-conventional": "^21.2.0",
-        "@hug/eslint-config": "^25.0.1",
+        "@hug/eslint-config": "^26.0.0",
         "cpy": "^13.2.2",
         "cross-spawn": "^7.0.6",
         "husky": "^9.1.7",
@@ -40,7 +40,8 @@
         "ts-node": "^10.9.2",
         "tslib": "^2.8.1",
         "typescript": "~6.0.3",
-        "vitest": "^4.1.9"
+        "vite-plugin-commonjs": "^0.10.4",
+        "vitest": "^4.1.10"
     },
     "commitlint": {
         "extends": [
@@ -52,5 +53,12 @@
             "eslint --fix"
         ]
     },
-    "packageManager": "npm@11.18.0"
+    "allowScripts": {
+        "@hug/eslint-config": true,
+        "@parcel/watcher": true,
+        "esbuild": true,
+        "fsevents": true,
+        "lmdb": true,
+        "msgpackr-extract": true
+    }
 }

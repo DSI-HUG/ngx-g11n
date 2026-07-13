@@ -1,8 +1,9 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
+        "outDir": "../../dist/ngx-g11n",
+        "tsBuildInfoFile": "../../node_modules/.tmp/tsconfig.lib.tsbuildinfo",
         "composite": true,
-        "outDir": "../../out-tsc/lib",
         "declaration": true,
         "declarationMap": true,
         "types": [
@@ -15,13 +16,5 @@
     "exclude": [
         "builders/*",
         "schematics/*"
-    ],
-    "angularCompilerOptions": {
-        "extendedDiagnostics": {
-            "checks": {
-                "nullishCoalescingNotNullable": "suppress",
-                "optionalChainNotNullable": "suppress"
-            }
-        }
-    }
+    ]
 }

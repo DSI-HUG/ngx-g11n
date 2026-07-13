@@ -3,10 +3,10 @@
     "include": [],
     "references": [
         {
-            "path": "./projects/demo-app"
+            "path": "./tsconfig.app.json"
         },
         {
-            "path": "./projects/lib"
+            "path": "./tsconfig.spec.json"
         }
     ]
 }

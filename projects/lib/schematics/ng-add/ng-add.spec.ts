@@ -1,14 +1,7 @@
-import { register } from 'ts-node';
-register({
-    compilerOptions: {
-        module: 'commonjs', // Ensures compatibility with the schematics engine
-    },
-});
-
-import type { UnitTestTree } from '@angular-devkit/schematics/testing';
+import type { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { type ApplicationDefinition, getProjectFromWorkspace } from '@hug/ngx-schematics-utilities';
 
-import { appTest1, appTest2, getCleanAppTree, runner } from '../utils.spec';
+import { appTest1, appTest2, createRunner, getCleanAppTree } from '../utils.spec';
 import { DEFAULT_OPTIONS } from '.';
 import type { NgAddOptions } from './ng-add-options';
 
@@ -19,9 +12,11 @@ import type { NgAddOptions } from './ng-add-options';
             let tree: UnitTestTree;
             let nbFiles: number;
             let project: ApplicationDefinition;
+            let runner: SchematicTestRunner;
 
             beforeEach(async () => {
-                tree = await getCleanAppTree(useWorkspace, useStandalone);
+                runner = createRunner();
+                tree = await getCleanAppTree(runner, useWorkspace, useStandalone);
                 nbFiles = tree.files.length;
                 defaultOptions = {
                     project: (useWorkspace) ? appTest2.name : appTest1.name,

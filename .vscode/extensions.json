@@ -1,8 +1,8 @@
 {
     "recommendations": [
         "angular.ng-template",
-        "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
+        "sibiraj-s.vscode-scss-formatter",
         "pkief.material-icon-theme"
     ]
 }

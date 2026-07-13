@@ -1,7 +1,8 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "outDir": "../../out-tsc/spec",
+        "outDir": "../../dist/demo-app-specs",
+        "tsBuildInfoFile": "../../node_modules/.tmp/tsconfig.app.specs.tsbuildinfo",
         "types": [
             "vitest/globals",
             "@angular/localize"

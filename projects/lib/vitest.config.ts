@@ -32,8 +32,12 @@ export default defineConfig({
                 name: 'schematics',
                 environment: 'node',
                 globals: true,
+                isolate: false,
                 include: [
                     'schematics/**/*.spec.ts',
+                ],
+                setupFiles: [
+                    'vitest.setup.ts',
                 ],
             },
         }],

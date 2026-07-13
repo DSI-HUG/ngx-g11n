@@ -1,27 +1,18 @@
 {
-    "extends": "../../../tsconfig.hug.json",
+    "extends": "../../../tsconfig.base.json",
     "compilerOptions": {
         "rootDir": ".",
         "outDir": "../../../dist/ngx-g11n/builders",
-        "moduleResolution": "nodenext",
+        "tsBuildInfoFile": "../../../node_modules/.tmp/tsconfig.lib.builders.tsbuildinfo",
         "module": "nodenext",
-        "target": "ES2022",
-        "lib": [
-            "ES2022",
-            "dom"
-        ],
+        "moduleResolution": "nodenext",
         "types": [
             "vitest/globals",
             "node"
         ],
         "composite": true,
         "declaration": true,
-        "declarationMap": false,
-        "noEmitOnError": true,
-        "skipDefaultLibCheck": true,
-        "strictNullChecks": true,
-        "skipLibCheck": true,
-        "sourceMap": true
+        "declarationMap": false
     },
     "include": [
         "**/*.ts"

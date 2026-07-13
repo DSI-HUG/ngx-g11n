@@ -1,11 +1,11 @@
 /**
- * Usage: $ node ./make.mjs <watch|build|build-global>
+ * Usage: $ node ./make.mjs <watch|build>
  */
 
 import { watch as chokidarWatch } from 'chokidar';
 import cpy from 'cpy';
 import crossSpawn from 'cross-spawn';
-import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, resolve as pathResolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { styleText } from 'node:util';
@@ -106,18 +106,6 @@ const registerExitEvents = () => {
     process.on('uncaughtException', cleanUp);
 };
 
-const packDistAndInstallGlobally = async () => {
-    log('> Packing..');
-    spawnCmd('npm', ['pack', DIST_PATH, '--pack-destination', DIST_PATH]);
-
-    log('> Installing globally..');
-    const distPkgJson = JSON.parse(readFileSync(`${DIST_PATH}/package.json`));
-    const libName = distPkgJson.name.replace('@', '').replace('/', '-');
-    const filePath = `${DIST_PATH}/${libName}-${distPkgJson.version}.tgz`;
-    spawnCmd('npm', ['install', '--global', filePath]);
-    rmSync(filePath);
-};
-
 const buildSchematics = async (exitOnError = true) => {
     if (existsSync(SCHEMATICS_SRC_PATH)) {
         if (existsSync('./schematics/tsconfig.schematics.json')) {
@@ -192,15 +180,6 @@ const watch = async () => {
                 await buildLib();
                 await buildSchematics();
                 await buildBuilders();
-                log(`> ${styleText('green', 'Done!')}\n`);
-                break;
-            case 'build-global':
-                log('> Cleaning..');
-                await cleanDir(DIST_PATH);
-                await buildLib();
-                await buildSchematics();
-                await buildBuilders();
-                await packDistAndInstallGlobally();
                 log(`> ${styleText('green', 'Done!')}\n`);
                 break;
             default:
