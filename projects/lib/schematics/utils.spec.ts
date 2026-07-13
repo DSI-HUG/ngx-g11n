@@ -43,9 +43,9 @@ export const appTest2: ApplicationOptions = {
 
 export const collectionPath = join(__dirname, './collection.json');
 
-export const runner = new SchematicTestRunner('ngx-g11n', collectionPath);
+export const createRunner = (): SchematicTestRunner => new SchematicTestRunner('ngx-g11n', collectionPath);
 
-export const getCleanAppTree = async (useWorkspace = false, standalone = false): Promise<UnitTestTree> => {
+export const getCleanAppTree = async (runner: SchematicTestRunner, useWorkspace = false, standalone = false): Promise<UnitTestTree> => {
     appTest1.projectRoot = useWorkspace ? join(workspaceOptions.newProjectRoot!, appTest1.name) : '';
     appTest2.projectRoot = useWorkspace ? join(workspaceOptions.newProjectRoot!, appTest2.name) : '';
 

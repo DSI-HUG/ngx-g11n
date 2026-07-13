@@ -1,8 +1,8 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "composite": false,
-        "outDir": "../../out-tsc/app",
+        "outDir": "../../dist/demo-app",
+        "tsBuildInfoFile": "../../node_modules/.tmp/tsconfig.app.tsbuildinfo",
         "types": [
             "@angular/localize"
         ]
@@ -12,13 +12,5 @@
     ],
     "exclude": [
         "src/**/*.spec.ts"
-    ],
-    "angularCompilerOptions": {
-        "extendedDiagnostics": {
-            "checks": {
-                "nullishCoalescingNotNullable": "suppress",
-                "optionalChainNotNullable": "suppress"
-            }
-        }
-    }
+    ]
 }

@@ -34,9 +34,8 @@
         "start": "node ./make.mjs watch",
         "lint": "eslint .",
         "test": "vitest --passWithNoTests",
-        "test:ci": "vitest --passWithNoTests --watch=false",
+        "test:ci": "vitest run --passWithNoTests",
         "build": "node ./make.mjs build",
-        "build:global": "node ./make.mjs build-global",
         "release": "npm publish ../../dist/ngx-g11n --access=public --workspaces=false"
     },
     "peerDependencies": {
@@ -64,7 +63,7 @@
         }
     },
     "dependencies": {
-        "@hug/ngx-schematics-utilities": "^12.1.5",
+        "@hug/ngx-schematics-utilities": "^12.2.0",
         "tslib": "^2.8.1"
     },
     "builders": "./builders/builders.json",
