@@ -266,7 +266,7 @@ interface G11nOptions {
     loadLocaleExtra?: boolean;
     /** @default true */
     useTranslations?: boolean;
-    /** @default '/translations' (or '/assets/translations' for legacy apps) */
+    /** @default 'translations' (or 'assets/translations' for legacy apps) */
     rootTranslationsPath?: string;
     /** @default [] */
     translationScopes?: string[];

@@ -39,7 +39,7 @@
             "x-prompt": "Path to the root translation folder",
             "description": "Path to the root translation folder",
             "type": "string",
-            "default": "/translations"
+            "default": "translations"
         },
         "translationScopes": {
             "x-prompt": "Scopes to load translations from (comma-separated)",

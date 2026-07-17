@@ -37,7 +37,7 @@ export interface G11nOptions {
 
     /**
      * Root path where translation files are located.
-     * @default '/translations' (or '/assets/translations' for legacy apps)
+     * @default 'translations' (or 'assets/translations' for legacy apps)
      */
     rootTranslationsPath?: string;
 
