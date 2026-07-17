@@ -20,7 +20,7 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     useNavigatorLanguage: true,
     loadLocaleExtra: false,
     useTranslations: true,
-    rootTranslationsPath: '/translations',
+    rootTranslationsPath: 'translations',
     translationScopes: [],
     queryParamName: QUERY_PARAM_NAME,
     storage: localStorage,

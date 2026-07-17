@@ -38,7 +38,7 @@ export const DEFAULT_OPTIONS: G11nOptions = {
     defaultCurrency: 'CHF',
     useNavigatorLanguage: true,
     loadLocaleExtra: false,
-    rootTranslationsPath: '/translations',
+    rootTranslationsPath: 'translations',
     translationScopes: [],
     queryParamName: 'lang',
 };
