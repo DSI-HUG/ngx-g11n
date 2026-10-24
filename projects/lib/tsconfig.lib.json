@@ -11,6 +11,7 @@
         ]
     },
     "include": [
+        "vitest.config.mts",
         "**/*.ts"
     ],
     "exclude": [
